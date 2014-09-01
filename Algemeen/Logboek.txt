@@ -1,0 +1,15 @@
+1sep14
+12u begonnen
+Overleg met Peter en Sander voor de opdracht; inhoudelijk duidelijk gemaakt nl
+	programma maken dat pdump files uit oude kaart leest en de nieuwe kaart
+	vergelijkt, samenvoegt (aanpassingen van de oude kaart overnemen) en op
+	de nieuwe kaart zetten. Dus alle veranderingen die op de oude kaart zijn
+	gedaan, moeten op de nieuwe kaart komen te staan, samen met alle nieuwere
+	parameters die al op de nieuwe kaart stonden. Dit gebeurt nu nog handmatig
+	maar moet uiteindelijk eenvoudig over te zetten zijn. Uiteindelijk komt
+	hiervoor een grafische applicatie.
+
+Verwachtingen:
+Een beter beeld krijgen bij wat ik uiteindelijk wil gaan doen na mijn stage.
+Veel embedded systems werk, wil ik dit doen? Beter zicht in het bedrijfsleven als
+technicus. Ervaring opdoen.
