@@ -1,4 +1,11 @@
-1sep14
+Verwachtingen van stage
+Een beter beeld krijgen bij wat ik uiteindelijk wil gaan doen na mijn stage.
+Veel embedded systems werk, wil ik dit doen? 
+Beter zicht in het bedrijfsleven als technicus.
+Ervaring opdoen.
+
+Week 1
+	1sep14
 12u begonnen
 Overleg met Peter en Sander voor de opdracht; inhoudelijk duidelijk gemaakt nl
 	programma maken dat pdump files uit oude kaart leest en de nieuwe kaart
@@ -8,8 +15,12 @@ Overleg met Peter en Sander voor de opdracht; inhoudelijk duidelijk gemaakt nl
 	parameters die al op de nieuwe kaart stonden. Dit gebeurt nu nog handmatig
 	maar moet uiteindelijk eenvoudig over te zetten zijn. Uiteindelijk komt
 	hiervoor een grafische applicatie.
+Begonnen aan het maken van een plan van aanpak met debrief of ik de opdracht goed
+	begrepen heb.
+Begonnen aan een planning en alle momenten vanuit school erin gezet (stagehandldn)
 
-Verwachtingen:
-Een beter beeld krijgen bij wat ik uiteindelijk wil gaan doen na mijn stage.
-Veel embedded systems werk, wil ik dit doen? Beter zicht in het bedrijfsleven als
-technicus. Ervaring opdoen.
+	2sep14
+8u op school aanwezig om stageovereenkomst in te leveren; bericht van mieke dat 
+	het onvangen was en ingevoerd werd.
+10u aanwezig bij Swarco. Verder gewerkt aan plan van aanpak.
+
