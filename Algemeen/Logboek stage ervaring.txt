@@ -20,7 +20,12 @@ Begonnen aan het maken van een plan van aanpak met debrief of ik de opdracht goe
 Begonnen aan een planning en alle momenten vanuit school erin gezet (stagehandldn)
 
 	2sep14
-8u op school aanwezig om stageovereenkomst in te leveren; bericht van mieke dat 
-	het onvangen was en ingevoerd werd.
-10u aanwezig bij Swarco. Verder gewerkt aan plan van aanpak.
+8u op school aanwezig om stageovereenkomst in te leveren; bericht van Mieke dat 
+	het onvangen was en ingevoerd werd (rond 10u30).
+10u aanwezig bij Swarco. Verder gewerkt aan plan van aanpak. Eerste versie 
+	opgestuurd naar Peter voor controle. 
+Begonnen aan omgeving voor applicatie; windows visual studio
+	
+
+	
 

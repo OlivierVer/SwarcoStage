@@ -1,0 +1,17 @@
+Gui();
+
+
+Methoden:
+
+getpDump(File 1); 		pdump van huidige kaart en sla op in file
+checkpDump(File 1, File 2);	vergelijkt twee files
+	mergeDump(File 1, File 2);
+pushParams(File 3);		parameters terug zetten vanuit file
+
+
+
+
+
+Txt file1; pDump oude regeling/kaart
+Txt file2; pDump nieuwe regeling/kaart
+Txt file3?; pDump met merged
