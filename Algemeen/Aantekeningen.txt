@@ -1,0 +1,12 @@
+Stappen op straat:
+Verbinding maken	
+Dump oude kaart	
+Verbinding verbreken & oude kaart eruit
+Verbinding maken
+Dump nieuwe kaart
+Pak beide dumps en vergelijk verschillen
+
+Verschillen checken:
+Check beide dumps, welke nieuw en welke oud
+Controleer elementen met elkaar; niet regel voor regel
+Verander nieuwe elementen naar waarden van oude kaart	
