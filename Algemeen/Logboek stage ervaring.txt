@@ -5,7 +5,7 @@ Beter zicht in het bedrijfsleven als technicus.
 Ervaring opdoen.
 
 Week 1
-	1sep14
+	ma1sep14
 12u begonnen
 Overleg met Peter en Sander voor de opdracht; inhoudelijk duidelijk gemaakt nl
 	programma maken dat pdump files uit oude kaart leest en de nieuwe kaart
@@ -19,20 +19,27 @@ Begonnen aan het maken van een plan van aanpak met debrief of ik de opdracht goe
 	begrepen heb.
 Begonnen aan een planning en alle momenten vanuit school erin gezet (stagehandldn)
 
-	2sep14
+	di2sep14
 8u op school aanwezig om stageovereenkomst in te leveren; bericht van Mieke dat 
 	het onvangen was en ingevoerd werd (rond 10u30).
 10u aanwezig bij Swarco. Verder gewerkt aan plan van aanpak. Eerste versie 
 	opgestuurd naar Peter voor controle. 
 Begonnen aan omgeving voor applicatie; windows visual studio
 	
-	3sep14
+	wo3sep14
 8u15 aanwezig; met Sander en Yousuf? naar nieuw geinstalleerd installatiekast
 	gekeken en uitleg gekregen hoe het in elkaar zat. Verteld over tijd-
 	voorspellers, CCOL regeling, detectoren,..
 Visual Studio 13 geinstalleerd
 PvA terug met feedback en aangepast. Ook besproken hoe de applicatie gebruikt zal
 	worden op straat
-15u vertrokken voor gesprek met stagebegeleider 
+15u vertrokken voor gesprek met stagebegeleider. 
+16u15 aangekomen; stagebegeleider niet aanwezig; ziek naar huis.
+
+	do4sep14
+8u15 aanwezig; mail gestuurd naar stagebegeleider ivm nieuwe afspraak
+PvA nieuwe versie opgestuurd naar Peter
+Visual Studio mee gespeeld; hello world programma
+
 	
 
