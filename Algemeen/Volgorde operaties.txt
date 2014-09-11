@@ -1,0 +1,29 @@
+ ______			 ______
+|Client|		|Server|
+|______|		|______|
+Init Winsock
+Make Socket
+Connect		-->	Accept connection
+Send 'pdump'	-->	Make pdump
+		<--	Send pdump
+Receive pdump
+Save pdump on disk
+*Close socket/Winsock
+
+	** Wisseling van kaart **
+
+Repeat <- Init Winsock -> save pdump
+Open 2nd pdump, read
+Check 1st pdump for matches
+
+Match found:
+Check if values are (same)? stop, continue
+Init Winsock
+Make Socket
+Connect		-->	Accept connection
+Send 'set param'-->	Change parameter
+		<--	"Done"
+(log)? continue, Make log file
+Add to log 'Changed param pX from vY to vZ \n'
+
+Repeat <- Read 2nd dump and check 1st pdump for matches

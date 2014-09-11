@@ -1,3 +1,4 @@
+			Gebruik programma
 Stappen op straat:
 Verbinding maken	
 Dump oude kaart	
@@ -10,3 +11,15 @@ Verschillen checken:
 Check beide dumps, welke nieuw en welke oud
 Controleer elementen met elkaar; niet regel voor regel
 Verander nieuwe elementen naar waarden van oude kaart	
+
+
+			Sockets
+Gebruiken: streaming, non-blocking socket. Winsock v2.x
+2 soorten sockets; Streaming socket (SOCK_STREAM) en Datagram socket (SOCK_DGRAM)
+	streaming voor constante stroom data (tcp/http) <--- gebruiken
+	datagram voor connectieloos (udp)en max buffer size
+Port 80 voor http
+Sockets blocking en non-blocking mode; blocking laat processor hangen totdat
+	verbinding gemaakt of gefaalt is. Non-blocking laat processor doorgaan.
+	Non-blocking mode gebruiken.
+API gebruiken, SPI ook? (tcp/ip verkeer)
