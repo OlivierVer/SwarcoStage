@@ -1,17 +1,17 @@
 #include "GUI.h"
-#include "newDirectory.h"
 
 #define WIN32_MEAN_AND_LEAN
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
-#include <iostream>
 #include <windows.h>
+#include <string>
+#include <stdio.h>
+#include <fstream>
+#include <istream>
+#include <iostream>
 
 using namespace System;
 using namespace System::Windows::Forms;
-
-SOCKET s;
-SOCKADDR_IN target;
 
 [STAThread]
 void Main(array<String^>^ args)

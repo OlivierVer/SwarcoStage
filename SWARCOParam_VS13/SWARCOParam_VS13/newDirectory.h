@@ -79,7 +79,6 @@ namespace SWARCOParam_VS13 {
 			this->naamTextBox->Name = L"naamTextBox";
 			this->naamTextBox->Size = System::Drawing::Size(385, 26);
 			this->naamTextBox->TabIndex = 1;
-			this->naamTextBox->Text = L"ParijsB18";
 			this->naamTextBox->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &newDirectory::naamTextBox_MouseDown);
 			// 
 			// opslaanButton
@@ -123,17 +122,12 @@ namespace SWARCOParam_VS13 {
 
 		}
 #pragma endregion
+
 	private: System::Void opslaanButton_Click(System::Object^  sender, System::EventArgs^  e) {
-		if (naamTextBox->Text == "ParijsB18" || naamTextBox->Text == "" || naamTextBox->Text == "Vul kruispunt in") {
+		if (naamTextBox->Text == "" || naamTextBox->Text == "Vul kruispunt in") {
 			naamTextBox->Text = "Vul kruispunt in";
 		}
 		else {
-			//Create new folder with text from label; TODO convert name to accept with folder name
-			
-			//String^ name = naamTextBox->Text;
-			//WCHAR* folder = L".\\" + name;
-			//CreateDirectory(folder, NULL);
-
 			DialogResult = System::Windows::Forms::DialogResult::OK;
 			this->Close();
 		}
@@ -143,7 +137,8 @@ private: System::Void annulerenButton_Click(System::Object^  sender, System::Eve
 	this->Close();
 }
 private: System::Void naamTextBox_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
-	naamTextBox->Text = "";
+	if (naamTextBox->Text == "Vul kruispunt in") 
+		naamTextBox->Text = "";
 }
 };
 }
