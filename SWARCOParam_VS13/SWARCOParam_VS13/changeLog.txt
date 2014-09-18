@@ -1,0 +1,7 @@
+TOG 021 aangepast naar 420. Oude waarde was 240 mph
+TOG 026 aangepast naar 455. Oude waarde was 120 mph
+TOG 041 aangepast naar 125. Oude waarde was 150 mph
+TOG 055 aangepast naar 25. Oude waarde was 170 mph
+TOG 070 aangepast naar 35. Oude waarde was 220 mph
+TOG 090 aangepast naar 0. Oude waarde was 20 mph
+TOG 099 aangepast naar 0. Oude waarde was 110 mph

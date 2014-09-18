@@ -1,0 +1,35 @@
+**** PDUMP 0013 / MA 15-09-2014 / 15:19:22 ****
+TOG 02 = 0 mph
+TOG 06 = 20 mph
+TOG 08 = 40 mph
+TOG 012 = 60 mph
+TOG 014 = 80 mph
+TOG 018 = 100 mph
+TOG 020 = 120 mph
+TOG 024 = 140 mph
+TOG 026 = 160 mph
+TOG 030 = 180 mph
+TOG 032 = 200 mph
+TOG 036 = 220 mph
+TOG 038 = 240 mph
+TOG 042 = 260 mph
+TOG 044 = 280 mph
+TOG 048 = 300 mph
+TOG 050 = 320 mph
+TOG 054 = 340 mph
+TOG 056 = 360 mph
+TOG 060 = 380 mph
+TOG 062 = 400 mph
+TOG 066 = 420 mph
+TOG 068 = 440 mph
+TOG 072 = 460 mph
+TOG 074 = 480 mph
+TOG 078 = 500 mph
+TOG 080 = 520 mph
+TOG 084 = 540 mph
+TOG 086 = 560 mph
+TOG 090 = 580 mph
+TOG 092 = 600 mph
+TOG 096 = 620 mph
+TOG 098 = 640 mph
+**** EINDE PDUMP ****

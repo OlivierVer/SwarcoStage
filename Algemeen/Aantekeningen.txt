@@ -9,8 +9,8 @@ Pak beide dumps en vergelijk verschillen
 
 Verschillen checken:
 Check beide dumps, welke nieuw en welke oud
-Controleer elementen met elkaar; niet regel voor regel
-Verander nieuwe elementen naar waarden van oude kaart	
+Controleer elementen met elkaar; niet regelnummer met regelnummer
+Verander nieuwe elementen naar waarden van oude kaart
 
 
 			Sockets
@@ -23,3 +23,12 @@ Sockets blocking en non-blocking mode; blocking laat processor hangen totdat
 	verbinding gemaakt of gefaalt is. Non-blocking laat processor doorgaan.
 	Non-blocking mode gebruiken.
 API gebruiken, SPI ook? (tcp/ip verkeer)
+
+
+			Overwegingen
+Visual Studio 2013: windows libraries al geinstalleerd, moet windows programma
+	maken in C++. Nadeel; had geen designer view om de gui makkelijk te maken
+Visual Studio 2010 Express: had een designer view, drag and drop gui in elkaar
+	gezet. Ondersteunde niet de manieren om van char* naar string over te
+	gaan en vice versa
+Eclipse: Vetrouwde omgeving en visual studio gaf niet genoeg voldoening
