@@ -5,11 +5,13 @@
 #include <windows.h>
 #include <string>
 #include <stdio.h>
+#include <iostream>
 #include <fstream>
 #include <istream>
-#include <iostream>
 
 #include <tchar.h>
+
+#define DEFAULT_BUFLEN 0x0000ffff
 
 namespace SWARCOParam_VS13 {
 
@@ -19,6 +21,7 @@ namespace SWARCOParam_VS13 {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
+	using namespace System::IO;
 
 	/// <summary>
 	/// Summary for GUI
@@ -65,6 +68,11 @@ namespace SWARCOParam_VS13 {
 	private: System::Windows::Forms::Button^  afsluitenButton;
 	private: System::Windows::Forms::Button^  selecteerKruispuntButton;
 	private: System::Windows::Forms::Button^  wissenButton;
+	private: System::Windows::Forms::Button^  button1;
+	private: System::Windows::Forms::Button^  button2;
+	private: System::Windows::Forms::Button^  button3;
+	private: System::Windows::Forms::OpenFileDialog^  openFileDialog1;
+	private: System::Windows::Forms::Button^  button4;
 
 	private:
 		/// <summary>
@@ -96,11 +104,17 @@ namespace SWARCOParam_VS13 {
 			this->ipTextBox = (gcnew System::Windows::Forms::TextBox());
 			this->poortTextBox = (gcnew System::Windows::Forms::TextBox());
 			this->wissenButton = (gcnew System::Windows::Forms::Button());
+			this->button1 = (gcnew System::Windows::Forms::Button());
+			this->button2 = (gcnew System::Windows::Forms::Button());
+			this->button3 = (gcnew System::Windows::Forms::Button());
+			this->openFileDialog1 = (gcnew System::Windows::Forms::OpenFileDialog());
+			this->button4 = (gcnew System::Windows::Forms::Button());
 			this->SuspendLayout();
 			// 
 			// outputTextBox
 			// 
-			this->outputTextBox->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 16));
+			this->outputTextBox->Font = (gcnew System::Drawing::Font(L"Courier New", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
 			this->outputTextBox->Location = System::Drawing::Point(13, 13);
 			this->outputTextBox->Margin = System::Windows::Forms::Padding(5);
 			this->outputTextBox->Name = L"outputTextBox";
@@ -130,7 +144,6 @@ namespace SWARCOParam_VS13 {
 			this->verbindLabel->Size = System::Drawing::Size(203, 22);
 			this->verbindLabel->TabIndex = 2;
 			this->verbindLabel->Text = L"Verbind met IP op poort:";
-			this->verbindLabel->Click += gcnew System::EventHandler(this, &GUI::verbindLabel_Click);
 			// 
 			// controleerButton
 			// 
@@ -151,9 +164,9 @@ namespace SWARCOParam_VS13 {
 			this->pdump1Button->Location = System::Drawing::Point(630, 159);
 			this->pdump1Button->Margin = System::Windows::Forms::Padding(5);
 			this->pdump1Button->Name = L"pdump1Button";
-			this->pdump1Button->Size = System::Drawing::Size(385, 60);
+			this->pdump1Button->Size = System::Drawing::Size(267, 60);
 			this->pdump1Button->TabIndex = 8;
-			this->pdump1Button->Text = L"Maak pdump1 en selecteer";
+			this->pdump1Button->Text = L"Maak pDump1 en selecteer";
 			this->pdump1Button->UseVisualStyleBackColor = true;
 			this->pdump1Button->Click += gcnew System::EventHandler(this, &GUI::pdump1Button_Click);
 			// 
@@ -166,13 +179,12 @@ namespace SWARCOParam_VS13 {
 			this->pdump2Button->Name = L"pdump2Button";
 			this->pdump2Button->Size = System::Drawing::Size(385, 60);
 			this->pdump2Button->TabIndex = 9;
-			this->pdump2Button->Text = L"Maak pdump2 en selecteer";
+			this->pdump2Button->Text = L"Maak pDump2 en selecteer";
 			this->pdump2Button->UseVisualStyleBackColor = true;
 			this->pdump2Button->Click += gcnew System::EventHandler(this, &GUI::pdump2Button_Click);
 			// 
 			// vergelijkButton
 			// 
-			this->vergelijkButton->Enabled = false;
 			this->vergelijkButton->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 13));
 			this->vergelijkButton->Location = System::Drawing::Point(630, 446);
 			this->vergelijkButton->Margin = System::Windows::Forms::Padding(5);
@@ -190,10 +202,10 @@ namespace SWARCOParam_VS13 {
 			this->pdump1LinkLabel->Location = System::Drawing::Point(626, 224);
 			this->pdump1LinkLabel->Margin = System::Windows::Forms::Padding(5, 0, 5, 0);
 			this->pdump1LinkLabel->Name = L"pdump1LinkLabel";
-			this->pdump1LinkLabel->Size = System::Drawing::Size(93, 22);
+			this->pdump1LinkLabel->Size = System::Drawing::Size(232, 22);
 			this->pdump1LinkLabel->TabIndex = 13;
 			this->pdump1LinkLabel->TabStop = true;
-			this->pdump1LinkLabel->Text = L"Onbekend";
+			this->pdump1LinkLabel->Text = L"Onbekend_Test/pdump1.txt";
 			this->pdump1LinkLabel->VisitedLinkColor = System::Drawing::Color::Blue;
 			this->pdump1LinkLabel->LinkClicked += gcnew System::Windows::Forms::LinkLabelLinkClickedEventHandler(this, &GUI::pdump1LinkLabel_LinkClicked);
 			// 
@@ -204,10 +216,10 @@ namespace SWARCOParam_VS13 {
 			this->pdump2LinkLabel->Location = System::Drawing::Point(626, 350);
 			this->pdump2LinkLabel->Margin = System::Windows::Forms::Padding(5, 0, 5, 0);
 			this->pdump2LinkLabel->Name = L"pdump2LinkLabel";
-			this->pdump2LinkLabel->Size = System::Drawing::Size(93, 22);
+			this->pdump2LinkLabel->Size = System::Drawing::Size(232, 22);
 			this->pdump2LinkLabel->TabIndex = 14;
 			this->pdump2LinkLabel->TabStop = true;
-			this->pdump2LinkLabel->Text = L"Onbekend";
+			this->pdump2LinkLabel->Text = L"Onbekend_Test/pdump2.txt";
 			this->pdump2LinkLabel->LinkClicked += gcnew System::Windows::Forms::LinkLabelLinkClickedEventHandler(this, &GUI::pdump2LinkLabel_LinkClicked);
 			// 
 			// logButton
@@ -277,7 +289,7 @@ namespace SWARCOParam_VS13 {
 			this->ipTextBox->Name = L"ipTextBox";
 			this->ipTextBox->Size = System::Drawing::Size(247, 27);
 			this->ipTextBox->TabIndex = 20;
-			this->ipTextBox->Text = L"192.168.0.75";
+			this->ipTextBox->Text = L"192.168.100.75";
 			// 
 			// poortTextBox
 			// 
@@ -302,11 +314,63 @@ namespace SWARCOParam_VS13 {
 			this->wissenButton->UseVisualStyleBackColor = true;
 			this->wissenButton->Click += gcnew System::EventHandler(this, &GUI::wissenButton_Click);
 			// 
+			// button1
+			// 
+			this->button1->Location = System::Drawing::Point(628, 592);
+			this->button1->Name = L"button1";
+			this->button1->Size = System::Drawing::Size(70, 36);
+			this->button1->TabIndex = 23;
+			this->button1->Text = L"local";
+			this->button1->UseVisualStyleBackColor = true;
+			this->button1->Click += gcnew System::EventHandler(this, &GUI::button1_Click);
+			// 
+			// button2
+			// 
+			this->button2->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12));
+			this->button2->Location = System::Drawing::Point(628, 627);
+			this->button2->Name = L"button2";
+			this->button2->Size = System::Drawing::Size(70, 36);
+			this->button2->TabIndex = 24;
+			this->button2->Text = L"remote";
+			this->button2->UseVisualStyleBackColor = true;
+			this->button2->Click += gcnew System::EventHandler(this, &GUI::button2_Click);
+			// 
+			// button3
+			// 
+			this->button3->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12));
+			this->button3->ForeColor = System::Drawing::Color::Black;
+			this->button3->Location = System::Drawing::Point(694, 592);
+			this->button3->Name = L"button3";
+			this->button3->Size = System::Drawing::Size(64, 36);
+			this->button3->TabIndex = 25;
+			this->button3->Text = L"unlock";
+			this->button3->UseVisualStyleBackColor = true;
+			this->button3->Click += gcnew System::EventHandler(this, &GUI::button3_Click);
+			// 
+			// openFileDialog1
+			// 
+			this->openFileDialog1->FileName = L"openFileDialog1";
+			// 
+			// button4
+			// 
+			this->button4->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 13));
+			this->button4->Location = System::Drawing::Point(905, 159);
+			this->button4->Name = L"button4";
+			this->button4->Size = System::Drawing::Size(110, 60);
+			this->button4->TabIndex = 8;
+			this->button4->Text = L"Selecteer bestaand";
+			this->button4->UseVisualStyleBackColor = true;
+			this->button4->Click += gcnew System::EventHandler(this, &GUI::button4_Click);
+			// 
 			// GUI
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(10, 20);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1036, 668);
+			this->Controls->Add(this->button4);
+			this->Controls->Add(this->button3);
+			this->Controls->Add(this->button2);
+			this->Controls->Add(this->button1);
 			this->Controls->Add(this->wissenButton);
 			this->Controls->Add(this->poortTextBox);
 			this->Controls->Add(this->ipTextBox);
@@ -333,26 +397,48 @@ namespace SWARCOParam_VS13 {
 
 		}
 #pragma endregion
+		//MEMBERS
+	SOCKET s;
+	private: bool visited = false;
+	private: int iResult = -1;
+	private: String^ currentDirectory;
 
-		SOCKET s;
-		private: bool visited = false;
-
+		//PRACTICAL FUNCTIONS
+	private: char* strToChar(String^ _str) {
+		IntPtr ptrToNativeString = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(_str);
+		char* strChar = static_cast<char*>(ptrToNativeString.ToPointer());
+		return strChar;
+	}
+	private: String^ charToStr(char* _char) {
+		return gcnew String(_char);
+	}
 	private: void scrollDown() {
 		outputTextBox->SelectionStart = outputTextBox->Text->Length; 
 		outputTextBox->ScrollToCaret();
 	}
-	private: bool makeConnection(String^ port, String^ ip) {
+	private: bool timeout() {
+		struct timeval tv;
+		fd_set readfds;
+		tv.tv_sec = 2;
+		//tv.tv_usec = 500000;
 
+		FD_ZERO(&readfds);
+		FD_SET(s, &readfds);
+
+		return (select(s + 1, &readfds, NULL, NULL, &tv) == 0);
+	}
+	
+		//FUNCTIONAL FUNCTIONS
+	private: bool makeConnection() {
 		SOCKADDR_IN target;
 		WSADATA wsaData;
 
-		int portNo = Convert::ToInt32(port);	//Convert String^ to int
-		IntPtr ptrToNativeString = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(ip); 
-		char* ipAddr = static_cast<char*>(ptrToNativeString.ToPointer());	//Convert String^ to char*
+		int portNo = Convert::ToInt32(poortTextBox->Text);	//Convert String^ to int
+		char* ipAddr = strToChar(ipTextBox->Text);	//Convert String^ to char*
 		
 		int error = WSAStartup(0x202, &wsaData);
 		if (error) {
-			outputTextBox->Text += "Error: Winsock fout\n";
+			outputTextBox->Text += "Error: Winsock start fout\n";
 			return false; //winsock error
 		}
 		if (wsaData.wVersion != 0x202) {
@@ -372,36 +458,157 @@ namespace SWARCOParam_VS13 {
 		}
 
 		if (connect(s, (SOCKADDR *)&target, sizeof(target)) == SOCKET_ERROR) {
-			outputTextBox->Text += "Error: socket fout\n";
+			outputTextBox->Text += "Error: geen verbinding kunnen maken\n";
 			return false; //socket error
 		}
-		else
+		else {
 			return true; //socket succes
+		}
 	}
 	private: bool closeConnection() {
-		if (s) {
-			closesocket(s);
+		closesocket(s);
+		WSACleanup();
+		outputTextBox->Text += "Verbinding gesloten\n\n";
+		scrollDown();
+		return true;
+	}
+	private: bool sendData(String^ data) {
+		outputTextBox->Refresh();
+
+		makeConnection();
+
+		char* dataChar = strToChar(data);
+		char* carriage = "\n";
+		//iResult = 
+		send(s, dataChar, (int)strlen(dataChar), 0);
+		iResult = send(s, carriage, (int)strlen(carriage), 0);
+		if (iResult == SOCKET_ERROR) {
+			outputTextBox->Text += "Verzenden van '" + data + "' niet gelukt. Error: " + WSAGetLastError() + "\n";
+			closeConnection();
 			WSACleanup();
-			outputTextBox->Text += "Verbinding gesloten\n\n";
-			scrollDown();
-			return true;
-		}
-		else
 			return false;
+		}
+		data = "";
+		return true;
 	}
-	private: void sendData() {
+	private: bool receiveData(String^ fileName) {
+		int recvbuflen = DEFAULT_BUFLEN;
+		StreamWriter^ outputFile = gcnew StreamWriter((fileName == "") ? fileName : fileName + ".txt");
+		
+		while (true) {
+			char recvbuf[DEFAULT_BUFLEN];
+			
+			iResult = recv(s, recvbuf, recvbuflen, 0);
+			String^ output = charToStr(recvbuf);
+			memset(recvbuf, 0, sizeof(recvbuf));	//Reset recvbuf
+			
+			if (iResult > 0) {
+				outputTextBox->Text += output;
+				int i = -1;
+				bool lastCharWasSpace = false;
 
+				while (true) {
+					i++;
+					if (i >= output->Length) {
+						break;
+					}
+					if (lastCharWasSpace == true && output[i] == ' ') {
+						outputFile->WriteLine("");
+						while (i != output->Length && output[i] == ' ') {
+							i++;
+						}
+						lastCharWasSpace = false;
+						i--;
+						continue;
+					}
+					if (output[i] == ' ') {
+						lastCharWasSpace = true;
+						continue;
+					}
+					else
+						lastCharWasSpace = false;
+
+					outputFile->Write(output[i]);
+				}
+			}
+			else if (iResult == 0) {
+				outputTextBox->Text += "Verbinding extern verbroken\n";
+				return false;
+			}
+			else {
+				outputTextBox->Text += "Geen data ontvangen\n";
+				return false;
+			}
+			if (timeout())
+				break;
+			scrollDown();
+		}
+		outputFile->Close();
+		closeConnection();
+		return true;
 	}
-	private: void receiveData() {
+	private: void compareFiles() {
+		//std::ifstream dump1(strToChar(pdump1LinkLabel->Text))
+		//	, dump2(strToChar(pdump2LinkLabel->Text));
 
+		StreamWriter^ verschillen = gcnew StreamWriter("Onbekend_Test\\verschillen.txt");
+		StreamReader^ dump1 = gcnew StreamReader("Onbekend_Test\\pdump1.txt");
+		StreamReader^ dump2 = gcnew StreamReader("Onbekend_Test\\pdump2.txt");
+
+		if (!dump1) { outputTextBox->Text += "pDump1 kon niet geopend worden\n"; return; }
+		if (!dump2) { outputTextBox->Text += "pDump2 kon niet geopend worden\n"; return; }
+
+		while (!dump2->EndOfStream) {	//Go through pdump2 and seperate parameter and value
+			String^ parameter2, ^ value2, ^ line2 = dump2->ReadLine();
+			if (line2 == "" || line2->Contains("*") || line2->Contains(">")) {
+				continue;
+			}
+			parameter2 = line2->Substring(0, line2->IndexOf(':'));
+			value2 = (line2->Contains("/")) ? line2->Substring(line2->IndexOf(':') + 1,
+				(line2->IndexOf('/') - line2->IndexOf(':') - 1))
+			   : line2->Substring(line2->IndexOf(':') + 1);
+
+			outputTextBox->Text += "Checking " + line2;
+
+			while (!dump1->EndOfStream) {	//Go through pdump1 to find matches
+				String^ parameter, ^ value, ^ line = dump1->ReadLine();
+				if (line == "" || line->Contains("*") || line->Contains(">")) {
+					continue;
+				}
+				parameter = line->Substring(0, line->IndexOf(':'));
+				if (parameter == parameter2) {	//Match found, get values
+					value = (line->Contains("/")) ? line->Substring(line->IndexOf(':') + 1,
+						(line->IndexOf('/') - line->IndexOf(':') - 1))
+						: line->Substring(line->IndexOf(':') + 1);
+					if (value != value2) {	//Check values, not same? Write!
+						verschillen->WriteLine(parameter + " WERKT " + value);
+						break;
+					}
+					break;
+				}
+			}	
+		}
+
+		dump1->Close();
+		dump2->Close();
+		verschillen->Close();
+
+			//Lees file 2 (nieuwe kaart) en zoek in file 1 dezelfde parameter
+			//Zijn deze niet gelijk, verander dan file 2 naar waarde van file 1	
 	}
-
+		//GUI COMPONENTS
 	private: System::Void inputTextBox_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
-		if (e->KeyChar == (char)13) {
+		if (e->KeyChar == (char)13 && inputTextBox->Text != "") {
 			String^ text = inputTextBox->Text;
 			inputTextBox->Text = "";
 			outputTextBox->Text += text + "\n";
+			
+			outputTextBox->Refresh(); 
+			inputTextBox->Refresh();
+			
+			sendData(text);
 			scrollDown();
+			receiveData("pdumpTest");
 		}
 	}
 	private: System::Void controleerButton_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -409,7 +616,7 @@ namespace SWARCOParam_VS13 {
 		outputTextBox->Text += "Verbinding controleren met " + ipTextBox->Text + " op poort " + poortTextBox->Text + "...\n";
 		outputTextBox->Refresh();
 
-		bool verbinding = makeConnection(poortTextBox->Text, ipTextBox->Text);
+		bool verbinding = makeConnection();
 		if (verbinding)
 			outputTextBox->Text += "Verbinding goed\n";
 		else 
@@ -435,67 +642,19 @@ namespace SWARCOParam_VS13 {
 			WinExec("notepad.exe \"pdump2.txt\"", SW_SHOW);
 	}
 	private: System::Void pdump1Button_Click(System::Object^  sender, System::EventArgs^  e) {
-		std::string dump1;
-		String^ text = "";
-
-		dump1 += "**** PDUMP 0013 / MA 15-09-2014 / 14:12:11 ****\n";
-		text = "**** PDUMP 0013 / MA 15-09-2014 / 14:12:11 ****\n";
-		outputTextBox->Text += text;
-		for (int i = 0; i < 100; i++) {
-			if (i % 3 == 1) {
-				dump1 += "TOG 0" + std::to_string(i) + " = " + std::to_string(20 * (i / 5)) + " mph\n";
-				text = "TOG 0" + (i)+" = " + (20 * (i / 5)) + " mph\n";
-			}
-			else if ((i/2) % 3 == 2) {
-				dump1 += "TOG 0" + std::to_string(i + 1) + " = " + std::to_string(20 * (i / 2)) + " mph\n";
-				text = "TOG 0" + (i + 1) + " = " + (20 * (i / 2)) + " mph\n";
-			}
-			outputTextBox->Text += text;
-			scrollDown();
-		}
-		dump1 += "**** EINDE PDUMP ****\n";
-		text = "**** EINDE PDUMP ****\n";
-		outputTextBox->Text += text;
-
-		std::ofstream file1("pdump1.txt");
-		file1 << dump1;
-		file1.close();
-
-		if (true) { //pDump made succesfully
+		outputTextBox->Text += "Bezig met pDump1 maken...\n";
+		sendData("pdump");
+		scrollDown();
+		if (receiveData("pdump1")) { //pDump made succesfully
 			pdump2Button->Enabled = true;
 			pdump1LinkLabel->Text = kruispuntSelectedLabel->Text + "/pdump1.txt";
 		}
 	}
 	private: System::Void pdump2Button_Click(System::Object^  sender, System::EventArgs^  e) {
-		std::string dump2;
-		String^ text = "";
-
-		dump2 += "**** PDUMP 0013 / MA 15-09-2014 / 15:19:22 ****\n";
-		text = "**** PDUMP 0013 / MA 15-09-2014 / 15:19:22 ****\n";
-		outputTextBox->Text += text;
-		for (int i = 0; i < 100; i++) {
-			if (i % 3 == 0) {
-				if (i % 3 == 1) { 
-					dump2 += "TOG 0" + std::to_string(i) + " = " + std::to_string(20 * (i / 4)) + " mph\n";
-					text = "TOG 0" + (i) + " = " + (20 * (i / 4)) + " mph\n";
-				}
-			}
-			else
-				if (i % 2 == 1) {
-				dump2 += "TOG 0" + std::to_string(i + 1) + " = " + std::to_string(20 * (i / 3)) + " mph\n";
-				text = "TOG 0" + (i + 1) + " = " + (20 * (i / 3)) + " mph\n";
-				}
-			outputTextBox->Text += text;
-			scrollDown();
-		}
-		dump2 += "**** EINDE PDUMP ****\n";
-		text = "**** EINDE PDUMP ****\n";
-		outputTextBox->Text += text;
-
-		std::ofstream file2("pdump2.txt");
-		file2 << dump2;
-		file2.close();
-		if (true) { //pDump made succesfully
+		outputTextBox->Text += "Bezig met pDump2 maken...\n"; 
+		sendData("pdump");
+		scrollDown();
+		if (receiveData("pdump2")) { //pDump made succesfully
 			vergelijkButton->Enabled = true;
 			pdump2LinkLabel->Text = kruispuntSelectedLabel->Text + "/pdump2.txt";
 		}
@@ -507,17 +666,14 @@ namespace SWARCOParam_VS13 {
 		if (result == System::Windows::Forms::DialogResult::OK) {
 			kruispuntSelectedLabel->Text = form->naamTextBox->Text;
 			
-			//Convert label to usable directory name
-			String^ _folder = kruispuntSelectedLabel->Text;
-			IntPtr ptrToNativeString = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(_folder); 
-			char* folder = static_cast<char*>(ptrToNativeString.ToPointer());
-			if (visited == true) {	//Prevent 2nd time using program to put new folder in existing one
+			char* folder = strToChar(kruispuntSelectedLabel->Text);
+			if (visited == true) {	//Prevent 2nd time using button to put new folder in existing one
 				SetCurrentDirectory(L"..");
 				pdump2Button->Enabled = false;
 				vergelijkButton->Enabled = false;
 				logButton->Enabled = false;
 			}
-
+			currentDirectory = charToStr(folder);
 			CreateDirectoryA(folder, NULL);
 			SetCurrentDirectoryA(folder);
 			visited = true;
@@ -526,31 +682,26 @@ namespace SWARCOParam_VS13 {
 		}
 	}
 	private: System::Void vergelijkButton_Click(System::Object^  sender, System::EventArgs^  e) {
-	std::ofstream fileLog("changeLog.txt");
-	fileLog << "TOG 021 aangepast naar 420. Oude waarde was 240 mph\n";
-	fileLog << "TOG 026 aangepast naar 455. Oude waarde was 120 mph\n";
-	fileLog << "TOG 041 aangepast naar 125. Oude waarde was 150 mph\n";
-	fileLog << "TOG 055 aangepast naar 25. Oude waarde was 170 mph\n";
-	fileLog << "TOG 070 aangepast naar 35. Oude waarde was 220 mph\n";
-	fileLog << "TOG 090 aangepast naar 0. Oude waarde was 20 mph\n";
-	fileLog << "TOG 099 aangepast naar 0. Oude waarde was 110 mph\n";
-	fileLog.close();
+	//std::ofstream fileLog("changeLog.txt");
+	//fileLog << "TOG 021 aangepast naar 420. Oude waarde was 240 mph\n";
 
 	if (pdump1LinkLabel->Text == "Onbekend" || pdump2LinkLabel->Text == "Onbekend") {
-		outputTextBox->Text += "Nog niet beide PDUMP bestanden geladen.\n";
+		outputTextBox->Text += "Nog niet beide pDump bestanden geladen.\n";
 		scrollDown();
 	}
 	else 
-		if (false) {	//Check of beide dump bestanden van zelfde kruispunt zijn
-			outputTextBox->Text += "PDUMP bestanden zijn niet van hetzelfde kruispunt. Maak deze opnieuw.";
+		if (pdump1LinkLabel->Text->Substring(0, pdump1LinkLabel->Text->IndexOf("/")) != 
+				pdump2LinkLabel->Text->Substring(0, pdump2LinkLabel->Text->IndexOf("/"))) {	//Check of beide dumpbestanden van zelfde kruispunt zijn
+			outputTextBox->Text += "pDump bestanden zijn niet van hetzelfde kruispunt. Maak deze opnieuw.\n";
 		}	
 		else {
 			outputTextBox->Text += "Bezig met vergelijken van pDump bestanden...\n";
-			outputTextBox->Text += "Klaar!\n";
+			compareFiles();
 			if (true) {	//Vergelijken is voltooid
+				outputTextBox->Text += "Klaar!\n"; 
 				logButton->Enabled = true;
 			}
-			WinExec("notepad.exe \"changeLog.txt\"", SW_SHOW);
+			WinExec("notepad.exe \"Onbekend_Test\\verschillen.txt\"", SW_SHOW);
 			scrollDown();
 	}
 }
@@ -560,7 +711,31 @@ namespace SWARCOParam_VS13 {
 	private: System::Void wissenButton_Click(System::Object^  sender, System::EventArgs^  e) {
 		outputTextBox->Text = "";
 	}
-private: System::Void verbindLabel_Click(System::Object^  sender, System::EventArgs^  e) {
+
+
+//TEST BUTTONS
+private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
+	ipTextBox->Text = "127.0.0.1";
+	poortTextBox->Text = "5000";
+}
+private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {
+	ipTextBox->Text = "192.168.100.75";
+	poortTextBox->Text = "7000";
+}
+private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e) {
+	pdump1Button->Enabled = true;
+	pdump2Button->Enabled = true;
+	vergelijkButton->Enabled = true;
+	}
+private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {
+	OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
+	openFileDialog1->Filter = "Text Files|*.txt";
+	openFileDialog1->Title = "Select a pDump File";
+
+	if (openFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
+		pdump1LinkLabel->Text = currentDirectory +"\\" + 
+			openFileDialog1->FileName->Substring(openFileDialog1->FileName->LastIndexOf(L"\\") + 1);
+	}
 }
 };
 }

@@ -68,9 +68,10 @@ namespace SWARCOParam_VS13 {
 			this->naamLabel->Location = System::Drawing::Point(18, 14);
 			this->naamLabel->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->naamLabel->Name = L"naamLabel";
-			this->naamLabel->Size = System::Drawing::Size(310, 40);
+			this->naamLabel->Size = System::Drawing::Size(396, 40);
 			this->naamLabel->TabIndex = 0;
-			this->naamLabel->Text = L"Geef de naam van het kruispunt op\r\nFormat: <Stad><Kruispunt> (bv. ParijsB18)";
+			this->naamLabel->Text = L"Geef de naam van het kruispunt op\r\nFormat: Stad_Kruispunt (bv. Breda_Stations"
+				L"traat)";
 			// 
 			// naamTextBox
 			// 
@@ -127,18 +128,20 @@ namespace SWARCOParam_VS13 {
 		if (naamTextBox->Text == "" || naamTextBox->Text == "Vul kruispunt in") {
 			naamTextBox->Text = "Vul kruispunt in";
 		}
+		else if (!naamTextBox->Text->Contains("_")) {	//TODO: substring voor en na _ mag niet NULL zijn
+			naamTextBox->Text = "Gebruik het juiste format";
+			}
 		else {
 			DialogResult = System::Windows::Forms::DialogResult::OK;
 			this->Close();
 		}
 	}
-
-private: System::Void annulerenButton_Click(System::Object^  sender, System::EventArgs^  e) {
-	this->Close();
-}
-private: System::Void naamTextBox_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
-	if (naamTextBox->Text == "Vul kruispunt in") 
-		naamTextBox->Text = "";
-}
+	private: System::Void annulerenButton_Click(System::Object^  sender, System::EventArgs^  e) {
+		this->Close();
+	}
+	private: System::Void naamTextBox_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
+		if (naamTextBox->Text == "Vul kruispunt in" || naamTextBox->Text == "Gebruik het juiste format")
+			naamTextBox->Text = "";
+	}
 };
 }
