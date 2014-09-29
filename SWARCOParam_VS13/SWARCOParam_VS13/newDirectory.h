@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <string>
 
 namespace SWARCOParam_VS13 {
 
@@ -68,10 +69,10 @@ namespace SWARCOParam_VS13 {
 			this->naamLabel->Location = System::Drawing::Point(18, 14);
 			this->naamLabel->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->naamLabel->Name = L"naamLabel";
-			this->naamLabel->Size = System::Drawing::Size(396, 40);
+			this->naamLabel->Size = System::Drawing::Size(352, 40);
 			this->naamLabel->TabIndex = 0;
-			this->naamLabel->Text = L"Geef de naam van het kruispunt op\r\nFormat: Stad_Kruispunt (bv. Breda_Stations"
-				L"traat)";
+			this->naamLabel->Text = L"Geef de naam van het kruispunt op\r\nFormat: Stad-Kruispunt (bv. Breda-Stationstraa"
+				L"t)";
 			// 
 			// naamTextBox
 			// 
@@ -125,12 +126,14 @@ namespace SWARCOParam_VS13 {
 #pragma endregion
 
 	private: System::Void opslaanButton_Click(System::Object^  sender, System::EventArgs^  e) {
-		if (naamTextBox->Text == "" || naamTextBox->Text == "Vul kruispunt in") {
+		if (naamTextBox->Text == "" || naamTextBox->Text == "Vul kruispunt in") { //Check if text is empty || not changed
 			naamTextBox->Text = "Vul kruispunt in";
 		}
-		else if (!naamTextBox->Text->Contains("_")) {	//TODO: substring voor en na _ mag niet NULL zijn
+		if (!naamTextBox->Text->Contains("-")	//Check if format entered is correct
+				|| naamTextBox->Text->Substring(0, naamTextBox->Text->IndexOf('-')) == ""
+				|| naamTextBox->Text->Substring(naamTextBox->Text->IndexOf('-')+1) == "") {
 			naamTextBox->Text = "Gebruik het juiste format";
-			}
+		}
 		else {
 			DialogResult = System::Windows::Forms::DialogResult::OK;
 			this->Close();
@@ -140,7 +143,7 @@ namespace SWARCOParam_VS13 {
 		this->Close();
 	}
 	private: System::Void naamTextBox_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
-		if (naamTextBox->Text == "Vul kruispunt in" || naamTextBox->Text == "Gebruik het juiste format")
+		if (naamTextBox->Text == "Vul kruispunt in" || naamTextBox->Text == "Gebruik het juiste format")	//Empty input
 			naamTextBox->Text = "";
 	}
 };

@@ -1,4 +1,4 @@
-﻿Build started 25-9-2014 17:04:43.
+﻿Build started 29-9-2014 15:34:10.
      1>Project "C:\Hogeschool van Amsterdam\SWARCO\SwarcoStage\SWARCOParam_VS13\SWARCOParam_VS13\SWARCOParam_VS13.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /AI"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /AI"C:\Program Files (x86)\Windows Kits\8.1\References\CommonConfiguration\Neutral" /Zi /clr /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _UNICODE /D UNICODE /EHa /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /TP /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\mscorlib.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Drawing.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Windows.Forms.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xml.dll" /analyze- /errorReport:prompt /clr:nostdlib GUI.cpp newDirectory.cpp
@@ -9,9 +9,13 @@
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Hogeschool van Amsterdam\SWARCO\SwarcoStage\SWARCOParam_VS13\Debug\SWARCOParam_VS13.exe" /INCREMENTAL /NOLOGO WS2_32.lib /ASSEMBLYRESOURCE:Debug\SWARCOParam_VS13.GUI.resources /ASSEMBLYRESOURCE:Debug\SWARCOParam_VS13.newDirectory.resources /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Hogeschool van Amsterdam\SWARCO\SwarcoStage\SWARCOParam_VS13\Debug\SWARCOParam_VS13.pdb" /ASSEMBLYDEBUG /SUBSYSTEM:WINDOWS /TLBID:1 /ENTRY:"Main" /DYNAMICBASE /FIXED:NO /NXCOMPAT /MACHINE:X86 Debug\GUI.obj
          Debug\newDirectory.obj
          "Debug\.NETFramework,Version=v4.0.AssemblyAttributes.obj"
-         SWARCOParam_VS13.vcxproj -> C:\Hogeschool van Amsterdam\SWARCO\SwarcoStage\SWARCOParam_VS13\Debug\SWARCOParam_VS13.exe
-     1>Done Building Project "C:\Hogeschool van Amsterdam\SWARCO\SwarcoStage\SWARCOParam_VS13\SWARCOParam_VS13\SWARCOParam_VS13.vcxproj" (Build target(s)).
+     1>newDirectory.obj : error LNK2020: unresolved token (0A0003F2) "extern "C" unsigned int __stdcall SetTimer(struct HWND__ *,unsigned int,unsigned int,void (__stdcall*)(struct HWND__ *,unsigned int,unsigned int,unsigned long))" (?SetTimer@@$$J216YGIPAUHWND__@@IIP6GX0IIK@Z@Z)
+     1>GUI.obj : error LNK2028: unresolved token (0A0003F3) "extern "C" unsigned int __stdcall SetTimer(struct HWND__ *,unsigned int,unsigned int,void (__stdcall*)(struct HWND__ *,unsigned int,unsigned int,unsigned long))" (?SetTimer@@$$J216YGIPAUHWND__@@IIP6GX0IIK@Z@Z) referenced in function "private: bool __clrcall SWARCOParam_VS13::GUI::makeConnection(void)" (?makeConnection@GUI@SWARCOParam_VS13@@$$FA$AAM_NXZ)
+     1>GUI.obj : error LNK2019: unresolved external symbol "extern "C" unsigned int __stdcall SetTimer(struct HWND__ *,unsigned int,unsigned int,void (__stdcall*)(struct HWND__ *,unsigned int,unsigned int,unsigned long))" (?SetTimer@@$$J216YGIPAUHWND__@@IIP6GX0IIK@Z@Z) referenced in function "private: bool __clrcall SWARCOParam_VS13::GUI::makeConnection(void)" (?makeConnection@GUI@SWARCOParam_VS13@@$$FA$AAM_NXZ)
+     1>newDirectory.obj : error LNK2001: unresolved external symbol "extern "C" unsigned int __stdcall SetTimer(struct HWND__ *,unsigned int,unsigned int,void (__stdcall*)(struct HWND__ *,unsigned int,unsigned int,unsigned long))" (?SetTimer@@$$J216YGIPAUHWND__@@IIP6GX0IIK@Z@Z)
+     1>C:\Hogeschool van Amsterdam\SWARCO\SwarcoStage\SWARCOParam_VS13\Debug\SWARCOParam_VS13.exe : fatal error LNK1120: 3 unresolved externals
+     1>Done Building Project "C:\Hogeschool van Amsterdam\SWARCO\SwarcoStage\SWARCOParam_VS13\SWARCOParam_VS13\SWARCOParam_VS13.vcxproj" (Build target(s)) -- FAILED.
 
-Build succeeded.
+Build FAILED.
 
-Time Elapsed 00:00:06.12
+Time Elapsed 00:00:05.63

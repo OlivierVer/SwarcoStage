@@ -16,7 +16,6 @@ void Main(array<String^>^ args)
 	GetCurrentDirectoryA(50, folder);
 	CreateDirectoryA("pDump Data", NULL);
 	SetCurrentDirectoryA("pDump Data");
-
 	Application::EnableVisualStyles();
 	Application::SetCompatibleTextRenderingDefault(false);
 
