@@ -32,3 +32,7 @@ Visual Studio 2010 Express: had een designer view, drag and drop gui in elkaar
 	gezet. Ondersteunde niet de manieren om van char* naar string over te
 	gaan en vice versa
 Eclipse: Vetrouwde omgeving en visual studio gaf niet genoeg voldoening
+
+	in programma
+Directories loggekoppeld van bovenstaande: teveel gezeur met veranderen directory
+	Nu bestanden + pad op de achtergrond vasthouden
