@@ -45,43 +45,45 @@ namespace SWARCOParam_VS13 {
 			}
 		}
 	private: System::Windows::Forms::RichTextBox^  outputTextBox;
-	protected:
 	private: System::Windows::Forms::TextBox^  inputTextBox;
 	private: System::Windows::Forms::TextBox^  poortTextBox;
 	private: System::Windows::Forms::TextBox^  ipTextBox;
 
 	private: System::Windows::Forms::Label^  verbindLabel;
 	private: System::Windows::Forms::Label^  folderLabel;
-	private: System::Windows::Forms::Label^  folderSelectedLabel;
 
 	private: System::Windows::Forms::LinkLabel^  pdump1LinkLabel;
 	private: System::Windows::Forms::LinkLabel^  pdump2LinkLabel;
+	private: System::Windows::Forms::LinkLabel^  folderSelectedLabel;
 
 	private: System::Windows::Forms::Button^  controleerButton;
 	private: System::Windows::Forms::Button^  pdump1Button;
 	private: System::Windows::Forms::Button^  pdump2Button;
-	private: System::Windows::Forms::Button^  vergelijkButton;
-	private: System::Windows::Forms::Button^  resultaatVergelijkButton;
+	private: System::Windows::Forms::Button^  verschillenButton;
+	private: System::Windows::Forms::Button^  resultaatVerschillenButton;
+
+
 	private: System::Windows::Forms::Button^  afsluitenButton;
 	private: System::Windows::Forms::Button^  wissenButton;
 	private: System::Windows::Forms::Button^  selecteerDump1Button;
 	private: System::Windows::Forms::Button^  selecteerDump2Button;
 	private: System::Windows::Forms::Button^  selecteerFolderButton;
-
-	private: System::Windows::Forms::Button^  wijzigButton;
-	private: System::Windows::Forms::Button^  resultaatWijzigButton;
-
+	private: System::Windows::Forms::Button^  bijwerkenButton;
+	private: System::Windows::Forms::Button^  resultaatBijwerkenButton;
+	
 	private: System::Windows::Forms::CheckBox^  opslaanCheckBox;
 
 	private: System::Windows::Forms::OpenFileDialog^  openFileDialog1;
 	private: System::Windows::Forms::OpenFileDialog^  openFileDialog2;
 	private: System::Windows::Forms::FolderBrowserDialog^  folderBrowserDialog1;
+	private: System::Windows::Forms::SaveFileDialog^  saveFileDialog1;
 
 	private: System::Windows::Forms::Button^  button1;
 	private: System::Windows::Forms::Button^  button2;
 	private: System::Windows::Forms::Button^  button3;
 	private: System::Windows::Forms::Button^  button4;
-	private: System::Windows::Forms::SaveFileDialog^  saveFileDialog1;
+	private: System::Windows::Forms::PrintPreviewDialog^  printPreviewDialog1;
+
 
 	private:
 		/// <summary>
@@ -103,13 +105,12 @@ namespace SWARCOParam_VS13 {
 			this->controleerButton = (gcnew System::Windows::Forms::Button());
 			this->pdump1Button = (gcnew System::Windows::Forms::Button());
 			this->pdump2Button = (gcnew System::Windows::Forms::Button());
-			this->vergelijkButton = (gcnew System::Windows::Forms::Button());
+			this->verschillenButton = (gcnew System::Windows::Forms::Button());
 			this->pdump1LinkLabel = (gcnew System::Windows::Forms::LinkLabel());
 			this->pdump2LinkLabel = (gcnew System::Windows::Forms::LinkLabel());
-			this->resultaatVergelijkButton = (gcnew System::Windows::Forms::Button());
+			this->resultaatVerschillenButton = (gcnew System::Windows::Forms::Button());
 			this->afsluitenButton = (gcnew System::Windows::Forms::Button());
 			this->folderLabel = (gcnew System::Windows::Forms::Label());
-			this->folderSelectedLabel = (gcnew System::Windows::Forms::Label());
 			this->selecteerFolderButton = (gcnew System::Windows::Forms::Button());
 			this->ipTextBox = (gcnew System::Windows::Forms::TextBox());
 			this->poortTextBox = (gcnew System::Windows::Forms::TextBox());
@@ -121,17 +122,19 @@ namespace SWARCOParam_VS13 {
 			this->selecteerDump1Button = (gcnew System::Windows::Forms::Button());
 			this->selecteerDump2Button = (gcnew System::Windows::Forms::Button());
 			this->openFileDialog2 = (gcnew System::Windows::Forms::OpenFileDialog());
-			this->wijzigButton = (gcnew System::Windows::Forms::Button());
-			this->resultaatWijzigButton = (gcnew System::Windows::Forms::Button());
+			this->bijwerkenButton = (gcnew System::Windows::Forms::Button());
+			this->resultaatBijwerkenButton = (gcnew System::Windows::Forms::Button());
 			this->button4 = (gcnew System::Windows::Forms::Button());
 			this->folderBrowserDialog1 = (gcnew System::Windows::Forms::FolderBrowserDialog());
 			this->opslaanCheckBox = (gcnew System::Windows::Forms::CheckBox());
 			this->saveFileDialog1 = (gcnew System::Windows::Forms::SaveFileDialog());
+			this->folderSelectedLabel = (gcnew System::Windows::Forms::LinkLabel());
+			this->printPreviewDialog1 = (gcnew System::Windows::Forms::PrintPreviewDialog());
 			this->SuspendLayout();
 			// 
 			// outputTextBox
 			// 
-			this->outputTextBox->BackColor = System::Drawing::SystemColors::Control;
+			this->outputTextBox->BackColor = System::Drawing::SystemColors::Menu;
 			this->outputTextBox->Cursor = System::Windows::Forms::Cursors::Default;
 			this->outputTextBox->Font = (gcnew System::Drawing::Font(L"Courier New", 10));
 			this->outputTextBox->Location = System::Drawing::Point(13, 13);
@@ -143,7 +146,7 @@ namespace SWARCOParam_VS13 {
 			this->outputTextBox->Size = System::Drawing::Size(607, 529);
 			this->outputTextBox->TabIndex = 0;
 			this->outputTextBox->TabStop = false;
-			this->outputTextBox->Text = L"";
+			this->outputTextBox->Text = resources->GetString(L"outputTextBox.Text");
 			// 
 			// inputTextBox
 			// 
@@ -204,28 +207,28 @@ namespace SWARCOParam_VS13 {
 			this->pdump2Button->UseVisualStyleBackColor = true;
 			this->pdump2Button->Click += gcnew System::EventHandler(this, &GUI::pdump2Button_Click);
 			// 
-			// vergelijkButton
+			// verschillenButton
 			// 
-			this->vergelijkButton->Enabled = false;
-			this->vergelijkButton->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 13));
-			this->vergelijkButton->Location = System::Drawing::Point(630, 423);
-			this->vergelijkButton->Margin = System::Windows::Forms::Padding(5);
-			this->vergelijkButton->Name = L"vergelijkButton";
-			this->vergelijkButton->Size = System::Drawing::Size(282, 53);
-			this->vergelijkButton->TabIndex = 12;
-			this->vergelijkButton->Text = L"Vergelijken";
-			this->vergelijkButton->UseVisualStyleBackColor = true;
-			this->vergelijkButton->Click += gcnew System::EventHandler(this, &GUI::vergelijkButton_Click);
+			this->verschillenButton->Enabled = false;
+			this->verschillenButton->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 13));
+			this->verschillenButton->Location = System::Drawing::Point(630, 423);
+			this->verschillenButton->Margin = System::Windows::Forms::Padding(5);
+			this->verschillenButton->Name = L"verschillenButton";
+			this->verschillenButton->Size = System::Drawing::Size(282, 53);
+			this->verschillenButton->TabIndex = 12;
+			this->verschillenButton->Text = L"Verschillen";
+			this->verschillenButton->UseVisualStyleBackColor = true;
+			this->verschillenButton->Click += gcnew System::EventHandler(this, &GUI::verschillenButton_Click);
 			// 
 			// pdump1LinkLabel
 			// 
 			this->pdump1LinkLabel->AutoSize = true;
 			this->pdump1LinkLabel->Enabled = false;
-			this->pdump1LinkLabel->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 13));
+			this->pdump1LinkLabel->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12));
 			this->pdump1LinkLabel->Location = System::Drawing::Point(626, 224);
 			this->pdump1LinkLabel->Margin = System::Windows::Forms::Padding(5, 0, 5, 0);
 			this->pdump1LinkLabel->Name = L"pdump1LinkLabel";
-			this->pdump1LinkLabel->Size = System::Drawing::Size(150, 22);
+			this->pdump1LinkLabel->Size = System::Drawing::Size(133, 20);
 			this->pdump1LinkLabel->TabIndex = 13;
 			this->pdump1LinkLabel->TabStop = true;
 			this->pdump1LinkLabel->Text = L"Niet geselecteerd";
@@ -236,29 +239,29 @@ namespace SWARCOParam_VS13 {
 			// 
 			this->pdump2LinkLabel->AutoSize = true;
 			this->pdump2LinkLabel->Enabled = false;
-			this->pdump2LinkLabel->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 13));
+			this->pdump2LinkLabel->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12));
 			this->pdump2LinkLabel->Location = System::Drawing::Point(626, 350);
 			this->pdump2LinkLabel->Margin = System::Windows::Forms::Padding(5, 0, 5, 0);
 			this->pdump2LinkLabel->Name = L"pdump2LinkLabel";
-			this->pdump2LinkLabel->Size = System::Drawing::Size(150, 22);
+			this->pdump2LinkLabel->Size = System::Drawing::Size(133, 20);
 			this->pdump2LinkLabel->TabIndex = 14;
 			this->pdump2LinkLabel->TabStop = true;
 			this->pdump2LinkLabel->Text = L"Niet geselecteerd";
 			this->pdump2LinkLabel->VisitedLinkColor = System::Drawing::Color::Blue;
 			this->pdump2LinkLabel->LinkClicked += gcnew System::Windows::Forms::LinkLabelLinkClickedEventHandler(this, &GUI::pdump2LinkLabel_LinkClicked);
 			// 
-			// resultaatVergelijkButton
+			// resultaatVerschillenButton
 			// 
-			this->resultaatVergelijkButton->Enabled = false;
-			this->resultaatVergelijkButton->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 13));
-			this->resultaatVergelijkButton->Location = System::Drawing::Point(920, 423);
-			this->resultaatVergelijkButton->Margin = System::Windows::Forms::Padding(5);
-			this->resultaatVergelijkButton->Name = L"resultaatVergelijkButton";
-			this->resultaatVergelijkButton->Size = System::Drawing::Size(102, 53);
-			this->resultaatVergelijkButton->TabIndex = 15;
-			this->resultaatVergelijkButton->Text = L"Resultaat";
-			this->resultaatVergelijkButton->UseVisualStyleBackColor = true;
-			this->resultaatVergelijkButton->Click += gcnew System::EventHandler(this, &GUI::resultaatVergelijkButton_Click);
+			this->resultaatVerschillenButton->Enabled = false;
+			this->resultaatVerschillenButton->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 13));
+			this->resultaatVerschillenButton->Location = System::Drawing::Point(920, 423);
+			this->resultaatVerschillenButton->Margin = System::Windows::Forms::Padding(5);
+			this->resultaatVerschillenButton->Name = L"resultaatVerschillenButton";
+			this->resultaatVerschillenButton->Size = System::Drawing::Size(102, 53);
+			this->resultaatVerschillenButton->TabIndex = 15;
+			this->resultaatVerschillenButton->Text = L"Resultaat";
+			this->resultaatVerschillenButton->UseVisualStyleBackColor = true;
+			this->resultaatVerschillenButton->Click += gcnew System::EventHandler(this, &GUI::resultaatVerschillenButton_Click);
 			// 
 			// afsluitenButton
 			// 
@@ -283,19 +286,6 @@ namespace SWARCOParam_VS13 {
 			this->folderLabel->TabIndex = 17;
 			this->folderLabel->Text = L"Opslaglocatie";
 			// 
-			// folderSelectedLabel
-			// 
-			this->folderSelectedLabel->AutoSize = true;
-			this->folderSelectedLabel->Font = (gcnew System::Drawing::Font(L"Courier New", 14.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
-				static_cast<System::Byte>(0)));
-			this->folderSelectedLabel->Location = System::Drawing::Point(629, 62);
-			this->folderSelectedLabel->Margin = System::Windows::Forms::Padding(5, 0, 5, 0);
-			this->folderSelectedLabel->Name = L"folderSelectedLabel";
-			this->folderSelectedLabel->RightToLeft = System::Windows::Forms::RightToLeft::No;
-			this->folderSelectedLabel->Size = System::Drawing::Size(109, 21);
-			this->folderSelectedLabel->TabIndex = 18;
-			this->folderSelectedLabel->Text = L"Selecteer";
-			// 
 			// selecteerFolderButton
 			// 
 			this->selecteerFolderButton->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 13));
@@ -317,7 +307,7 @@ namespace SWARCOParam_VS13 {
 			this->ipTextBox->Name = L"ipTextBox";
 			this->ipTextBox->Size = System::Drawing::Size(247, 27);
 			this->ipTextBox->TabIndex = 20;
-			this->ipTextBox->Text = L"192.168.100.75";
+			this->ipTextBox->Text = L"192.168.0.75";
 			this->ipTextBox->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &GUI::ipTextBox_KeyPress);
 			// 
 			// poortTextBox
@@ -411,28 +401,28 @@ namespace SWARCOParam_VS13 {
 			// 
 			this->openFileDialog2->FileName = L"openFileDialog2";
 			// 
-			// wijzigButton
+			// bijwerkenButton
 			// 
-			this->wijzigButton->Enabled = false;
-			this->wijzigButton->Location = System::Drawing::Point(630, 484);
-			this->wijzigButton->Name = L"wijzigButton";
-			this->wijzigButton->Size = System::Drawing::Size(282, 53);
-			this->wijzigButton->TabIndex = 27;
-			this->wijzigButton->Text = L"Wijzigingen doorvoeren";
-			this->wijzigButton->UseVisualStyleBackColor = true;
-			this->wijzigButton->Click += gcnew System::EventHandler(this, &GUI::wijzigButton_Click);
+			this->bijwerkenButton->Enabled = false;
+			this->bijwerkenButton->Location = System::Drawing::Point(630, 484);
+			this->bijwerkenButton->Name = L"bijwerkenButton";
+			this->bijwerkenButton->Size = System::Drawing::Size(282, 53);
+			this->bijwerkenButton->TabIndex = 27;
+			this->bijwerkenButton->Text = L"Verschillen bijwerken";
+			this->bijwerkenButton->UseVisualStyleBackColor = true;
+			this->bijwerkenButton->Click += gcnew System::EventHandler(this, &GUI::bijwerkenButton_Click);
 			// 
-			// resultaatWijzigButton
+			// resultaatBijwerkenButton
 			// 
-			this->resultaatWijzigButton->Enabled = false;
-			this->resultaatWijzigButton->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 13));
-			this->resultaatWijzigButton->Location = System::Drawing::Point(920, 484);
-			this->resultaatWijzigButton->Name = L"resultaatWijzigButton";
-			this->resultaatWijzigButton->Size = System::Drawing::Size(104, 53);
-			this->resultaatWijzigButton->TabIndex = 28;
-			this->resultaatWijzigButton->Text = L"Resultaat";
-			this->resultaatWijzigButton->UseVisualStyleBackColor = true;
-			this->resultaatWijzigButton->Click += gcnew System::EventHandler(this, &GUI::resultaatWijzigButton_Click);
+			this->resultaatBijwerkenButton->Enabled = false;
+			this->resultaatBijwerkenButton->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 13));
+			this->resultaatBijwerkenButton->Location = System::Drawing::Point(920, 484);
+			this->resultaatBijwerkenButton->Name = L"resultaatBijwerkenButton";
+			this->resultaatBijwerkenButton->Size = System::Drawing::Size(104, 53);
+			this->resultaatBijwerkenButton->TabIndex = 28;
+			this->resultaatBijwerkenButton->Text = L"Resultaat";
+			this->resultaatBijwerkenButton->UseVisualStyleBackColor = true;
+			this->resultaatBijwerkenButton->Click += gcnew System::EventHandler(this, &GUI::resultaatBijwerkenButton_Click);
 			// 
 			// button4
 			// 
@@ -456,18 +446,43 @@ namespace SWARCOParam_VS13 {
 			this->opslaanCheckBox->UseVisualStyleBackColor = true;
 			this->opslaanCheckBox->CheckStateChanged += gcnew System::EventHandler(this, &GUI::opslaanCheckBox_CheckStateChanged);
 			// 
+			// folderSelectedLabel
+			// 
+			this->folderSelectedLabel->AutoSize = true;
+			this->folderSelectedLabel->Enabled = false;
+			this->folderSelectedLabel->Font = (gcnew System::Drawing::Font(L"Courier New", 13));
+			this->folderSelectedLabel->Location = System::Drawing::Point(628, 67);
+			this->folderSelectedLabel->Name = L"folderSelectedLabel";
+			this->folderSelectedLabel->Size = System::Drawing::Size(196, 20);
+			this->folderSelectedLabel->TabIndex = 31;
+			this->folderSelectedLabel->TabStop = true;
+			this->folderSelectedLabel->Text = L"Niet geselecteerd";
+			this->folderSelectedLabel->VisitedLinkColor = System::Drawing::Color::Blue;
+			this->folderSelectedLabel->LinkClicked += gcnew System::Windows::Forms::LinkLabelLinkClickedEventHandler(this, &GUI::folderSelectedLabel_LinkClicked);
+			// 
+			// printPreviewDialog1
+			// 
+			this->printPreviewDialog1->AutoScrollMargin = System::Drawing::Size(0, 0);
+			this->printPreviewDialog1->AutoScrollMinSize = System::Drawing::Size(0, 0);
+			this->printPreviewDialog1->ClientSize = System::Drawing::Size(400, 300);
+			this->printPreviewDialog1->Enabled = true;
+			this->printPreviewDialog1->Icon = (cli::safe_cast<System::Drawing::Icon^>(resources->GetObject(L"printPreviewDialog1.Icon")));
+			this->printPreviewDialog1->Name = L"printPreviewDialog1";
+			this->printPreviewDialog1->Visible = false;
+			// 
 			// GUI
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(10, 20);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->AutoScroll = true;
-			this->AutoSizeMode = System::Windows::Forms::AutoSizeMode::GrowAndShrink;
+			this->BackColor = System::Drawing::SystemColors::GradientInactiveCaption;
+			this->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"$this.BackgroundImage")));
 			this->BackgroundImageLayout = System::Windows::Forms::ImageLayout::None;
 			this->ClientSize = System::Drawing::Size(1036, 668);
+			this->Controls->Add(this->folderSelectedLabel);
 			this->Controls->Add(this->opslaanCheckBox);
 			this->Controls->Add(this->button4);
-			this->Controls->Add(this->resultaatWijzigButton);
-			this->Controls->Add(this->wijzigButton);
+			this->Controls->Add(this->resultaatBijwerkenButton);
+			this->Controls->Add(this->bijwerkenButton);
 			this->Controls->Add(this->selecteerDump2Button);
 			this->Controls->Add(this->selecteerDump1Button);
 			this->Controls->Add(this->button3);
@@ -477,13 +492,12 @@ namespace SWARCOParam_VS13 {
 			this->Controls->Add(this->poortTextBox);
 			this->Controls->Add(this->ipTextBox);
 			this->Controls->Add(this->selecteerFolderButton);
-			this->Controls->Add(this->folderSelectedLabel);
 			this->Controls->Add(this->folderLabel);
 			this->Controls->Add(this->afsluitenButton);
-			this->Controls->Add(this->resultaatVergelijkButton);
+			this->Controls->Add(this->resultaatVerschillenButton);
 			this->Controls->Add(this->pdump2LinkLabel);
 			this->Controls->Add(this->pdump1LinkLabel);
-			this->Controls->Add(this->vergelijkButton);
+			this->Controls->Add(this->verschillenButton);
 			this->Controls->Add(this->pdump2Button);
 			this->Controls->Add(this->pdump1Button);
 			this->Controls->Add(this->controleerButton);
@@ -503,9 +517,15 @@ namespace SWARCOParam_VS13 {
 		}
 #pragma endregion
 		//MEMBERS
-		SOCKET s;
+	SOCKET s;
+	private: int timeShort = 1, timeLong = 4;
 	private: bool folderSelected = false;
 	private: int iResult = -1;
+	private: bool firstConnection = true;
+	private: String^ directoryPath,
+		^ machineID = "",
+		^ lastInput = "",
+		^ savedToFile = "";
 	private: String^ fileDump1 = "",
 		^ fileDump2 = "",
 		^ fileLog1 = "",
@@ -527,7 +547,6 @@ namespace SWARCOParam_VS13 {
 		if (value->Contains(" ")) value = value->Substring(0, (value->Length - 1)); //remove ' '-space if it exists
 		return value;
 	}
-
 	private: void scrollDown() {
 		outputTextBox->Refresh();
 		outputTextBox->SelectionStart = outputTextBox->Text->Length;
@@ -537,47 +556,40 @@ namespace SWARCOParam_VS13 {
 		outputTextBox->Text += str;
 		scrollDown();
 	}
-	private: bool timeout(int sec) {
-		struct timeval tv;
-		fd_set readfds;
-		tv.tv_sec = sec;
-
-		FD_ZERO(&readfds);
-		FD_SET(s, &readfds);
-
-		return (select(s + 1, &readfds, NULL, NULL, &tv) == 0);
+	private: void timeout(int sec) {
+		int time = sec * 300;
+		setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char *)&time, sizeof(time));
 	}
 
 	private: void openTextFile(int i) {
-		std::string str = "notepad.exe \"";
+		std::string str = "notepad.exe \"";		// notepad.exe "
 		str.append(
-			(i == 1) ? strToChar(fileDump1) :
+			(i == 1) ? strToChar(fileDump1) :	// C:\..\.txt
 			(i == 2) ? strToChar(fileDump2) :
 			(i == 3) ? strToChar(fileLog1) :
 			(i == 4) ? strToChar(fileLog2) :
 			"");
-		str += "\"";
+		str += "\"";							// "   str ->  _notepad.exe "C:\..\.txt"_
 		LPCSTR openNotepad = str.c_str();
 		WinExec(openNotepad, SW_SHOW);
 	}
 	private: void checkFolderLength() {
-		if (folderSelectedLabel->Text->Length < 35) return;
+		if (folderSelectedLabel->Text->Length <= 35) return;
 		folderSelectedLabel->Text =
 			(folderSelectedLabel->Text->Length > 35 && folderSelectedLabel->Text->Length <= 70)
-			? folderSelectedLabel->Text->Substring(0, 35) + "\n"
-			+ folderSelectedLabel->Text->Substring(35, folderSelectedLabel->Text->Length - 35)
+			? folderSelectedLabel->Text->Substring(0, 35) 
+				+ "\n" + folderSelectedLabel->Text->Substring(35, folderSelectedLabel->Text->Length - 35)
 			: folderSelectedLabel->Text->Substring(0, 35)
-			+ "\n" + folderSelectedLabel->Text->Substring(35, 35)
-			+ "\n" + folderSelectedLabel->Text->Substring(70, folderSelectedLabel->Text->Length - 70);
+				+ "\n" + folderSelectedLabel->Text->Substring(35, 35)
+				+ "\n" + folderSelectedLabel->Text->Substring(70, folderSelectedLabel->Text->Length - 70);
 	}
 	private: String^ getDirectory() {
-		String^ parent = folderSelectedLabel->Text;
+		String^ parent = getPath();
 		parent = parent->Substring(parent->LastIndexOf('\\'));
 		return parent->Substring(1);	//to remove '\' at start
 	}
 	private: String^ getPath() {
-		String^ directory = folderSelectedLabel->Text;
-		return directory;
+		return directoryPath;
 	}
 
 	private: String^ getTime() {
@@ -600,53 +612,80 @@ namespace SWARCOParam_VS13 {
 			second += "0";
 		second += sstm.wSecond;
 
-		time += hour + "u" + minute + "m" + second + "s";
+		time += hour + minute + second;	//142001   14u 20m 01s
 		return time;
 	}
 	private: String^ getDate() {
 		SYSTEMTIME sstm;
 		GetSystemTime(&sstm);
-
-		String^ month =
-			(sstm.wMonth == 1) ? "jan" :
-			(sstm.wMonth == 2) ? "feb" :
-			(sstm.wMonth == 3) ? "maa" :
-			(sstm.wMonth == 4) ? "apr" :
-			(sstm.wMonth == 5) ? "mei" :
-			(sstm.wMonth == 6) ? "jun" :
-			(sstm.wMonth == 7) ? "jul" :
-			(sstm.wMonth == 8) ? "aug" :
-			(sstm.wMonth == 9) ? "sep" :
-			(sstm.wMonth == 10) ? "okt" :
-			(sstm.wMonth == 11) ? "nov" :
-			(sstm.wMonth == 12) ? "dec" : "";
-
-		String^ date = "", ^year = "";
-
-		year += sstm.wYear;
-		date += sstm.wDay + month + year->Substring(2, 2);
+		String^ date = "";
+		date += sstm.wYear + "" + sstm.wMonth + "" + sstm.wDay;
 
 		return date;
 	}
 	private: String^ getSaveAdd() {
-		String^ saveFileName = " - " + getTime() + " - " + getDate() + ".txt";
+		String^ saveFileName = " " + getDate() + " " + getTime();
 		return saveFileName;
 	}
 
 			 //FUNCTIONAL FUNCTIONS
+	private: void lockAll(bool _lock) {
+		bool lock = (_lock) ? false : true;
+		wissenButton->Enabled = lock;
+		opslaanCheckBox->Enabled = lock;
+		inputTextBox->Enabled = lock;
+		ipTextBox->Enabled = lock;
+		poortTextBox->Enabled = lock;
+		controleerButton->Enabled = lock;
+
+		selecteerFolderButton->Enabled = lock;
+		folderSelectedLabel->Enabled = lock;
+		pdump1Button->Enabled = lock;
+		pdump2Button->Enabled = lock;
+		pdump1LinkLabel->Enabled = lock;
+		pdump2LinkLabel->Enabled = lock;
+		selecteerDump1Button->Enabled = lock;
+		selecteerDump2Button->Enabled = lock;
+
+		verschillenButton->Enabled = lock;
+		resultaatVerschillenButton->Enabled = lock;
+		bijwerkenButton->Enabled = lock;
+		resultaatBijwerkenButton->Enabled = lock;
+
+		afsluitenButton->Enabled = lock;
+	}
 	private: bool selectFolder() {
 		FolderBrowserDialog^ folderBrowserDialog1 = gcnew FolderBrowserDialog;
 		System::Windows::Forms::DialogResult result;
 		result = folderBrowserDialog1->ShowDialog();
+		String^ path = "";
 
 		if (result == System::Windows::Forms::DialogResult::OK) {
-			String^ path = folderBrowserDialog1->SelectedPath;
-			folderSelectedLabel->Text = path;
-			checkFolderLength();
-			pdump1Button->Enabled = true;
-			return true;
+			if (folderBrowserDialog1->SelectedPath->Contains("New folder") 
+					|| folderBrowserDialog1->SelectedPath->Contains("Nieuwe map")) {
+				using System::Windows::Forms::MessageBox;
+				System::Windows::Forms::DialogResult result = MessageBox::Show(
+					this, "Klopt het pad: \"" + folderBrowserDialog1->SelectedPath + "\"?",
+					"Geselecteerde pad", MessageBoxButtons::YesNo);
+				if (result != System::Windows::Forms::DialogResult::Yes) {
+					return selectFolder();
+				}
+			}
+
+			path = folderBrowserDialog1->SelectedPath;
+			if (path != "") {
+				directoryPath = path;
+				folderSelectedLabel->Text = path;
+				folderSelectedLabel->Enabled = true;
+				checkFolderLength();
+				pdump1Button->Enabled = true;
+				return true;
+			}
+			else 
+				return false;
 		}
-		else return false;
+		else 
+			return false;
 	}
 	private: bool makeConnection() {
 		SOCKADDR_IN target;
@@ -658,13 +697,11 @@ namespace SWARCOParam_VS13 {
 		int error = WSAStartup(0x202, &wsaData);
 		if (error) {
 			xout("Error: Winsock start fout\n\n");
-			scrollDown();
 			return false; //winsock error
 		}
 		if (wsaData.wVersion != 0x202) {
 			WSACleanup();
 			xout("Error: Winsock is niet de juiste versie\n\n");
-			scrollDown();
 			return false; //winsock not right version
 		} //Winsock launched succesfully
 
@@ -675,21 +712,22 @@ namespace SWARCOParam_VS13 {
 		s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 		if (s == INVALID_SOCKET) {
 			xout("Error: Socket is niet geldig\n\n");
-			scrollDown();
 			return false; //invalid socket
 		}
 
-		xout("Bezig verbinding te maken (max 20 seconden)...\n");
-		scrollDown();
+		if (firstConnection) {
+			xout("Bezig met verbinding te maken (max 20 seconden)...\n");
+		}
+
 		if (connect(s, (SOCKADDR *)&target, sizeof(target)) == SOCKET_ERROR) {
 			xout("Error: Geen verbinding kunnen maken\n\n");
-			scrollDown();
+			firstConnection = true;
 			return false; //socket error
 		}
 		else {
-			return true; //socket succes
+			firstConnection = false;
+			return true; //socket succes	
 		}
-
 	}
 	private: bool closeConnection() {
 		closesocket(s);
@@ -698,28 +736,56 @@ namespace SWARCOParam_VS13 {
 		return true;
 	}
 	private: bool sendData(String^ data) {
+		char* dataChar = strToChar(data);
+		char* carriage = "\n";
 
-		if (makeConnection()) {
+		if (machineID == "") {
+			xout("Naam van verbonden apparaat zoeken...\n");
+			
+			StreamWriter^ outputFile = gcnew StreamWriter(getPath() + "\\tmp.txt");
 
-			char* dataChar = strToChar(data);
-			char* carriage = "\n";
-
-			send(s, dataChar, (int)strlen(dataChar), 0);
+			send(s, "", (int)strlen(dataChar), 0);
 			iResult = send(s, carriage, (int)strlen(carriage), 0);
-			if (iResult == SOCKET_ERROR) {
-				xout("Verzenden van '" + data + "' niet gelukt. Error: " + WSAGetLastError() + "\n");
-				scrollDown();
-				closeConnection();
-				WSACleanup();
-				return false;
+			
+			timeout(1);
+			while (true) {
+				char recvbuf[DEFAULT_BUFLEN];
+
+				iResult = recv(s, recvbuf, DEFAULT_BUFLEN, 0);
+				String^ output = charToStr(recvbuf);
+				memset(recvbuf, 0, sizeof(recvbuf));	//Reset recvbuf
+
+				if (iResult > 0) {
+					if (output->Contains(">")) {
+						String^ id = output->Substring(output->IndexOf(' ') + 1, //found machine ID, substrng to set machineID
+							output->IndexOf('>') - (output->IndexOf(' ') + 1));
+						machineID = id;
+						xout("Naam gevonden: " + machineID + "\n");
+					}
+				}
+				else
+					break;
 			}
-			return true;
+			outputFile->Close();
+			File::Delete(getPath() + "\\tmp.txt");
 		}
-		return false;
+
+		send(s, dataChar, (int)strlen(dataChar), 0);
+		iResult = send(s, carriage, (int)strlen(carriage), 0);
+		xout(data + "\n");
+
+		if (iResult == SOCKET_ERROR) {
+			xout("Verzenden van '" + data + "' niet gelukt. Error: " + WSAGetLastError() + "\n\n");
+			closeConnection();
+			WSACleanup();
+			return false;
+		}
+		return true;	
 	}
 	private: bool receiveDataOutput(int time) {
 		int recvbuflen = DEFAULT_BUFLEN;
 
+		timeout(time);
 		while (true) {
 			char recvbuf[DEFAULT_BUFLEN];
 
@@ -728,20 +794,21 @@ namespace SWARCOParam_VS13 {
 			memset(recvbuf, 0, sizeof(recvbuf));	//Reset recvbuf
 
 			if (iResult > 0) {
-				//xout(output);
-				outputTextBox->Text += output;
+				if (output->Contains("Please login")) {
+					xout("\nEr is nog niet ingelogt - log eerst in via command line\n"
+						+ "Opdracht afgebroken\n\n");
+					return false;
+				}
+				xout(output);
 			}
 			else if (iResult == 0) {
 				outputTextBox->Text += "Verbinding verbroken\n";
-				break;
+				return false;
 			}
 			else {
-				outputTextBox->Text += "Geen data ontvangen\n";
-				break;
+				outputTextBox->Text += "Geen data (meer) ontvangen\n";
+				return true;
 			}
-			if (timeout(time))
-				break;
-			scrollDown();
 		}
 		closeConnection();
 		return true;
@@ -749,9 +816,13 @@ namespace SWARCOParam_VS13 {
 	private: bool receiveDataSave(String^ fileName, int time) {
 		SetCurrentDirectoryA(strToChar(getPath()));
 		int recvbuflen = DEFAULT_BUFLEN;
-		StreamWriter^ outputFile = gcnew StreamWriter(
-			(fileName != "") ? fileName : "unknown.txt");
+		String^ saveFileName = getPath() + "\\" +
+			(fileName != "") ? fileName : "unknown";
+		saveFileName += " " + machineID + getSaveAdd() + ".txt";
 
+		StreamWriter^ outputFile = gcnew StreamWriter(saveFileName);
+
+		timeout(time);
 		while (true) {
 			char recvbuf[DEFAULT_BUFLEN];
 
@@ -760,9 +831,16 @@ namespace SWARCOParam_VS13 {
 			memset(recvbuf, 0, sizeof(recvbuf));	//Reset recvbuf
 
 			if (iResult > 0) {
-				//xout(output);
-				outputTextBox->Text += output;
-
+				if (output->Contains("Please login")) {
+					xout("\nEr is nog niet ingelogt - log eerst in via command line\n"
+						+ "Opdracht afgebroken\n\n");
+					outputFile->Close();
+					File::Delete(saveFileName);
+					return false;
+				}
+				
+				xout(output);
+				
 				int i = -1;
 				bool lastCharWasSpace = false;
 
@@ -792,26 +870,22 @@ namespace SWARCOParam_VS13 {
 			}
 			else if (iResult == 0) {
 				xout("Verbinding verbroken\n");
-				scrollDown();
 				outputFile->Close();
 				return false;
 			}
 			else {
-				xout("Geen data ontvangen\n");
-				scrollDown();
+				xout("Geen data (meer) ontvangen\n");
 				outputFile->Close();
-				return false;
+				savedToFile = saveFileName;
+				xout("Opgeslagen in: " + saveFileName + "\n");
+				return true;
 			}
-			if (timeout(time))
-				break;
-			scrollDown();
 		}
 		outputFile->Close();
-		closeConnection();
 		return true;
 	}
 	private: bool compareFiles(String^ saveFile) {
-		StreamWriter^ verschillen = gcnew StreamWriter(saveFile);
+		StreamWriter^ verschillen = gcnew StreamWriter(saveFile + ".txt");
 		StreamReader^ dump2 = gcnew StreamReader(fileDump2);
 		bool difference = false;
 		bool paramNotFound = true;
@@ -863,32 +937,18 @@ namespace SWARCOParam_VS13 {
 		if (!difference) { //Not a single difference in pdumps
 			verschillen->WriteLine("Er waren geen verschillen gevonden");
 		}
-
+		savedToFile = saveFile + ".txt";
 		dump2->Close();
 		verschillen->Close();
 		return true;
 	}
 	private: bool sendChanges(String^ saveFile) {
-		StreamWriter^ wijzigingen = gcnew StreamWriter(saveFile);
+		makeConnection();
+
+		StreamWriter^ wijzigingen = gcnew StreamWriter(saveFile + ".txt");
 		StreamReader^ verschillen = gcnew StreamReader(fileLog1);
 		String^ fileName = saveFile,
 			^ tempFile = getPath() + "\\temp.txt";
-
-		/*Copy 2nd dump to change after sending
-		std::string existingFile = "",
-		newFile = "";
-		String^ _newFile =
-		fileDump2->Substring(0, fileDump2->LastIndexOf('\\') + 1)				//Start until name of file
-		+ "(Updated)"															//(Updated)
-		+ fileDump2->Substring(fileDump2->LastIndexOf('\\') + 1,				//name of file
-		(fileDump2->IndexOf('-') - 3) - fileDump2->LastIndexOf('\\') + 1)	//until first -
-		+ getSaveAdd();
-		existingFile += strToChar(fileDump2);
-		newFile += strToChar(_newFile);
-		CopyFileA(existingFile.c_str(), newFile.c_str(), false);
-		StreamReader^ updated = gcnew StreamReader(_newFile);
-		//Done copying file
-		*/
 
 		while (!verschillen->EndOfStream) {	//Go through verschillen and check parameter and value of pdump1
 			String^ parameter,
@@ -907,12 +967,14 @@ namespace SWARCOParam_VS13 {
 			value2 = line->Substring(line->LastIndexOf(':') + 2);
 
 			if (sendData(parameter + " = " + value)) {	//Try to connect and send data
-				receiveDataSave(tempFile, 1);	//if data send, check if it was send correctly and values changed
+				receiveDataSave(tempFile, timeShort);	//if data send, check if it was send correctly and values changed
 
 				StreamReader^ temp = gcnew StreamReader(tempFile);
 				bool corrected = false;
+				bool fileIsEmpty = true;
 
 				while (!temp->EndOfStream) {	//Check the latest output for system corrections
+					fileIsEmpty = false;
 					String ^ tmpValue,
 						^ tmpLine = temp->ReadLine();
 
@@ -943,25 +1005,36 @@ namespace SWARCOParam_VS13 {
 						tmpValue = getValueFromLine(tmpLine);	//Last found value from file
 				}	//Done checking lastOutput
 				temp->Close();
+				//File::Delete(getPath() + "\\temp.txt");
+
+				if (fileIsEmpty) {
+					xout(parameter + " is NIET veranderd - geen bevestiging ontvangen\n");
+					wijzigingen->WriteLine(parameter + " is NIET veranderd - geen bevestiging ontvangen");
+					corrected = true;
+				}
 
 				if (!corrected) {
 					wijzigingen->WriteLine(parameter + " is veranderd van " + value2 + " naar " + value);
 					xout(parameter + " is veranderd van " + value2 + " naar " + value + "\n");
 				}
+				xout("\n");
 			}
 			else {	//Couldn't connect, don't continue trying
 				xout("Kon geen verbinding maken - gestopt met wijzigingen maken\n");
+				closeConnection();
 				return false;
 			}
 		}
+		closeConnection();
 		wijzigingen->Close();
 		verschillen->Close();
-		fileLog2 = saveFile;
+		savedToFile = saveFile + ".txt";
+		fileLog2 = savedToFile;
 		openTextFile(4);
 		return true;
 	}
 
-			 //GUI COMPONENTS
+	 //GUI COMPONENTS
 			 //CONNECTION
 	private: System::Void poortTextBox_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
 		// Accept only digits and the Backspace character
@@ -979,7 +1052,6 @@ namespace SWARCOParam_VS13 {
 			e->Handled = true;
 	}
 	private: System::Void controleerButton_Click(System::Object^  sender, System::EventArgs^  e) {
-		controleerButton->Enabled = false;
 		String^ p1 = ipTextBox->Text->Substring(0, ipTextBox->Text->IndexOf('.')),
 			^ rest = ipTextBox->Text->Substring(ipTextBox->Text->IndexOf('.') + 1),
 			^ p2 = rest->Substring(0, rest->IndexOf('.'));
@@ -987,7 +1059,9 @@ namespace SWARCOParam_VS13 {
 		String^ p3 = rest->Substring(0, rest->IndexOf('.'));
 		String^ p4 = rest->Substring(rest->IndexOf('.') + 1);
 
-		bool ip = (p1 == "" || p2 == "" || p3 == "" || p4 == "" || p4->Length > 3 || p4->Contains(".")) ? false : true;
+		bool ip = (p1 == "" || p2 == "" || p3 == "" || p4 == "" 
+			|| p1->Length > 3 || p2->Length > 3 || p3->Length > 3 || p4->Length > 3 
+			|| p4->Contains(".")) ? false : true;
 		bool port = (poortTextBox->Text != "") ? true : false;
 
 		//Check if IP and Port are entered correctly
@@ -1003,7 +1077,6 @@ namespace SWARCOParam_VS13 {
 		else {
 			xout("Vul een geldig IP adres en poort in\n\n");
 		}
-		controleerButton->Enabled = true;
 	}
 
 			 //TEXTBOX
@@ -1021,30 +1094,39 @@ namespace SWARCOParam_VS13 {
 				return;
 			}
 
-			xout(text + "\n");
 			if (inputTextBox->Text == "") {
 				return;
 			}
+			if (inputTextBox->Text == "close") {
+				closeConnection();
+				inputTextBox->Text = "";
+				return;
+			}
 
+			inputTextBox->Enabled = false;
+			lastInput = inputTextBox->Text;
+			int time = (inputTextBox->Text == "pdump") ? timeLong : timeShort;
 			inputTextBox->Text = "";
 			inputTextBox->Refresh();
 
-
+			makeConnection();
 			if (sendData(text)) {
 				if (opslaanCheckBox->Checked == true) {
-					String^ fileName = text + getSaveAdd();
-					receiveDataSave(fileName, 2);
+					String^ fileName = text;
+					if (receiveDataSave(fileName, time))
+						xout("Gereed\n\n");;
 				}
 				else
-					receiveDataOutput(2);
+					if (receiveDataOutput(time))
+						xout("Gereed\n\n");
 			}
+			inputTextBox->Enabled = true;
 			closeConnection();
-			xout("Gereed\n\n");
 		}
 	}
 	private: System::Void opslaanCheckBox_CheckStateChanged(System::Object^  sender, System::EventArgs^  e) {
 		if (opslaanCheckBox->Checked == true) {
-			if (folderSelectedLabel->Text == "Selecteer") {
+			if (!folderSelectedLabel->Enabled) {
 				if (!selectFolder()) {
 					opslaanCheckBox->Checked = false;
 					return;
@@ -1059,7 +1141,14 @@ namespace SWARCOParam_VS13 {
 	private: System::Void selecteerFolderButton_Click(System::Object^  sender, System::EventArgs^  e) {
 		selectFolder();
 	}
-
+	private: System::Void folderSelectedLabel_LinkClicked(System::Object^  sender, System::Windows::Forms::LinkLabelLinkClickedEventArgs^  e) {
+		std::string str = "explorer.exe \"";		// notepad.exe "
+		str.append(strToChar(directoryPath));
+		str += "\"";							// "   str ->  _notepad.exe "C:\..\.txt"_
+		LPCSTR openExplorer = str.c_str();
+		SetCurrentDirectoryA(strToChar(getPath()));
+		WinExec(openExplorer, SW_SHOW);
+	}
 			 //PDUMP
 	private: System::Void pdump1LinkLabel_LinkClicked(System::Object^  sender, System::Windows::Forms::LinkLabelLinkClickedEventArgs^  e) {
 		pdump1LinkLabel->Enabled = false;	//Disable the option of double-clicking
@@ -1073,37 +1162,52 @@ namespace SWARCOParam_VS13 {
 	}
 	private: System::Void pdump1Button_Click(System::Object^  sender, System::EventArgs^  e) {
 		pdump1Button->Enabled = false;
+		inputTextBox->Enabled = false;
+		inputTextBox->Refresh();
+
 		xout("Bezig met pDump1 maken...\n");
-		if (sendData("pdump")) {
-			String^ pdump1 = "pdump1" + getSaveAdd();
-			if (receiveDataSave(pdump1, 3)) { //pDump made succesfully
-				pdump2Button->Enabled = true;
-				fileDump1 = folderSelectedLabel->Text + "\\" + pdump1;
-				pdump1LinkLabel->Text = "..\\" + getDirectory() + "\\" + pdump1;
-				pdump1LinkLabel->Enabled = true;
-				closeConnection();
-				xout("Gereed\n\n");
+		if (makeConnection()) {
+			if (sendData("pdump")) {
+				String^ pdump1 = "PDUMP 1";
+				if (receiveDataSave(pdump1, timeLong)) { //pDump made succesfully
+					pdump2Button->Enabled = true;
+					fileDump1 = directoryPath + "\\" + savedToFile;
+					pdump1LinkLabel->Text = "..\\" + getDirectory() + "\\" + savedToFile;
+					pdump1LinkLabel->Enabled = true;
+					xout("Gereed\n\n");
+				}
 			}
 		}
-		scrollDown();
+		closeConnection();
 		pdump1Button->Enabled = true;
+		inputTextBox->Enabled = true;
+
 	}
 	private: System::Void pdump2Button_Click(System::Object^  sender, System::EventArgs^  e) {
 		pdump2Button->Enabled = false;
+		inputTextBox->Enabled = false;
+		inputTextBox->Refresh();
+		resultaatVerschillenButton->Enabled = false;
+		bijwerkenButton->Enabled = false;
+		resultaatBijwerkenButton->Enabled = false;
+
 		xout("Bezig met pDump2 maken...\n");
-		if (sendData("pdump")) {
-			String^ pdump2 = "pdump2" + " - " + getTime() + " - " + getDate()
-				+ ".txt";
-			if (receiveDataSave(pdump2, 3)) { //pDump made succesfully
-				vergelijkButton->Enabled = true;
-				fileDump2 = folderSelectedLabel->Text + "\\" + pdump2;
-				pdump2LinkLabel->Text = "..\\" + getDirectory() + "\\" + pdump2;
-				pdump2LinkLabel->Enabled = true;
-				closeConnection();
-				xout("Gereed\n\n");
+		if (makeConnection()) {
+			if (sendData("pdump")) {
+				String^ pdump2 = "PDUMP 2";
+				if (receiveDataSave(pdump2, timeLong)) { //pDump made succesfully
+					verschillenButton->Enabled = true;
+					fileDump2 = directoryPath + "\\" + savedToFile;
+					pdump2LinkLabel->Text = "..\\" + getDirectory() + "\\" + savedToFile;
+					pdump2LinkLabel->Enabled = true;
+					xout("Gereed\n\n");
+				}
 			}
 		}
+		closeConnection();
 		pdump2Button->Enabled = true;
+		inputTextBox->Enabled = true;
+
 	}
 	private: System::Void selecteerDump1Button_Click(System::Object^  sender, System::EventArgs^  e) {
 		selecteerDump1Button->Enabled = false;
@@ -1119,7 +1223,9 @@ namespace SWARCOParam_VS13 {
 				^ path = openFileDialog1->FileName->Substring(0, openFileDialog1->FileName->LastIndexOf('\\')),
 				^ parent = path->Substring(path->LastIndexOf('\\') + 1);
 
+			directoryPath = path;
 			folderSelectedLabel->Text = path;
+			folderSelectedLabel->Enabled = true;
 			fileDump1 = openFileDialog1->FileName;
 			pdump1LinkLabel->Text = "..\\" + parent + "\\" + fileName;
 			pdump1LinkLabel->Enabled = true;
@@ -1128,6 +1234,10 @@ namespace SWARCOParam_VS13 {
 	}
 	private: System::Void selecteerDump2Button_Click(System::Object^  sender, System::EventArgs^  e) {
 		selecteerDump2Button->Enabled = false;
+		resultaatVerschillenButton->Enabled = false;
+		bijwerkenButton->Enabled = false;
+		resultaatBijwerkenButton->Enabled = false;
+
 		OpenFileDialog ^ openFileDialog2 = gcnew OpenFileDialog();
 		openFileDialog2->Filter = "Text Files|*.txt";
 		openFileDialog2->Title = "Select a pDump File";
@@ -1141,24 +1251,22 @@ namespace SWARCOParam_VS13 {
 			fileDump2 = openFileDialog2->FileName;
 			pdump2LinkLabel->Text = "..\\" + parent + "\\" + fileName;
 			pdump2LinkLabel->Enabled = true;
-			vergelijkButton->Enabled = true;
+			verschillenButton->Enabled = true;
 		}
 		selecteerDump2Button->Enabled = true;
 	}
 
 			 //VERGELIJK/WIJZIG
-	private: System::Void vergelijkButton_Click(System::Object^  sender, System::EventArgs^  e) {
+	private: System::Void verschillenButton_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (pdump1LinkLabel->Enabled == false || pdump2LinkLabel->Enabled == false) {
 			xout("Fout: Nog niet beide pDump bestanden geladen\n");
 			return;
 		}
-		if (!pdump1LinkLabel->Text->Contains("pdump") || !pdump1LinkLabel->Text->Contains(".txt")
-			|| !pdump1LinkLabel->Text->Contains(" - ")) {
+		if (!pdump1LinkLabel->Text->Contains("pdump") || !pdump1LinkLabel->Text->Contains(".txt")) {
 			xout("Fout: pdump1 niet juist geselecteerd\n");
 			return;
 		}
-		if (!pdump2LinkLabel->Text->Contains("pdump") || !pdump2LinkLabel->Text->Contains(".txt")
-			|| !pdump2LinkLabel->Text->Contains(" - ")) {
+		if (!pdump2LinkLabel->Text->Contains("pdump") || !pdump2LinkLabel->Text->Contains(".txt")) {
 			xout("Fout: pdump2 niet juist geselecteerd\n");
 			return;
 		}
@@ -1167,39 +1275,39 @@ namespace SWARCOParam_VS13 {
 			String^ saveToFile = getPath() + "\\verschillen" + getSaveAdd();
 			if (compareFiles(saveToFile)) {	//Vergelijken is voltooid
 				xout("Gereed\n\n");
-				resultaatVergelijkButton->Enabled = true;
-				wijzigButton->Enabled = true;
+				resultaatVerschillenButton->Enabled = true;
+				bijwerkenButton->Enabled = true;
 
-				fileLog1 = saveToFile;
+				fileLog1 = savedToFile;
 				openTextFile(3); //file 3 = fileLog1;
 			}
 			else
 				xout("Vergelijken niet gelukt\n");
 		}
 	}
-	private: System::Void wijzigButton_Click(System::Object^  sender, System::EventArgs^  e) {
-		wijzigButton->Enabled = false;
+	private: System::Void bijwerkenButton_Click(System::Object^  sender, System::EventArgs^  e) {
+		bijwerkenButton->Enabled = false;
 		xout("Bezig met verschillen in te voeren...\n");
 		String^ saveToFile = getPath() + "\\wijzigingen" + getSaveAdd();
 
 		if (sendChanges(saveToFile)) {
 			xout("Gereed\n\n");
 			fileLog2 = saveToFile;
-			resultaatWijzigButton->Enabled = true;
+			resultaatBijwerkenButton->Enabled = true;
 		}
 		else
 			xout("Wijzigen niet gelukt\n\n");
-		wijzigButton->Enabled = true;
+		bijwerkenButton->Enabled = true;
 	}
-	private: System::Void resultaatVergelijkButton_Click(System::Object^  sender, System::EventArgs^  e) {
-		resultaatVergelijkButton->Enabled = false;	//Disable the option of double-clicking
+	private: System::Void resultaatVerschillenButton_Click(System::Object^  sender, System::EventArgs^  e) {
+		resultaatVerschillenButton->Enabled = false;	//Disable the option of double-clicking
 		openTextFile(3);
-		resultaatVergelijkButton->Enabled = true;
+		resultaatVerschillenButton->Enabled = true;
 	}
-	private: System::Void resultaatWijzigButton_Click(System::Object^  sender, System::EventArgs^  e) {
-		resultaatWijzigButton->Enabled = false;	//Disable the option of double-clicking
+	private: System::Void resultaatBijwerkenButton_Click(System::Object^  sender, System::EventArgs^  e) {
+		resultaatBijwerkenButton->Enabled = false;	//Disable the option of double-clicking
 		openTextFile(4);
-		resultaatWijzigButton->Enabled = true;
+		resultaatBijwerkenButton->Enabled = true;
 	}
 
 			 //AFSLUITEN
@@ -1224,7 +1332,7 @@ namespace SWARCOParam_VS13 {
 	private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e)	{	//Unlock
 		pdump1Button->Enabled = true;
 		pdump2Button->Enabled = true;
-		vergelijkButton->Enabled = true;
+		verschillenButton->Enabled = true;
 	}
 	private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {	//DUMP
 		/*
@@ -1306,6 +1414,5 @@ namespace SWARCOParam_VS13 {
 		*/
 	}
 
-	};
+};
 }
-

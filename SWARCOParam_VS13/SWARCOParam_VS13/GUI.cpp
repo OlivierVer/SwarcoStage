@@ -12,10 +12,6 @@ using namespace System::Windows::Forms;
 [STAThread]
 void Main(array<String^>^ args)
 {
-	LPSTR folder = "";
-	GetCurrentDirectoryA(50, folder);
-	CreateDirectoryA("pDump Data", NULL);
-	SetCurrentDirectoryA("pDump Data");
 	Application::EnableVisualStyles();
 	Application::SetCompatibleTextRenderingDefault(false);
 

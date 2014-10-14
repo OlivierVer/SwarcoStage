@@ -14,7 +14,7 @@ Global
 		{D65031C0-33C1-4CF0-A0B0-467E0F90B19F}.Debug|Win32.ActiveCfg = Debug|Win32
 		{D65031C0-33C1-4CF0-A0B0-467E0F90B19F}.Debug|Win32.Build.0 = Debug|Win32
 		{D65031C0-33C1-4CF0-A0B0-467E0F90B19F}.Release|Win32.ActiveCfg = Release|Win32
-		{D65031C0-33C1-4CF0-A0B0-467E0F90B19F}.Release|Win32.Build.0 = Release|Win32
+		{D65031C0-33C1-4CF0-A0B0-467E0F90B19F}.Release|Win32.Deploy.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
