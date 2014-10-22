@@ -7,6 +7,7 @@
 #include <fstream>
 #include <istream>
 #include <tchar.h>
+#include <process.h>
 
 #define DEFAULT_BUFLEN 0x0000ffff
 
@@ -62,7 +63,6 @@ namespace SWARCOParam_VS13 {
 	private: System::Windows::Forms::Button^  verschillenButton;
 	private: System::Windows::Forms::Button^  resultaatVerschillenButton;
 
-
 	private: System::Windows::Forms::Button^  afsluitenButton;
 	private: System::Windows::Forms::Button^  wissenButton;
 	private: System::Windows::Forms::Button^  selecteerDump1Button;
@@ -83,7 +83,6 @@ namespace SWARCOParam_VS13 {
 	private: System::Windows::Forms::Button^  button3;
 	private: System::Windows::Forms::Button^  button4;
 	private: System::Windows::Forms::PrintPreviewDialog^  printPreviewDialog1;
-
 
 	private:
 		/// <summary>
@@ -147,6 +146,7 @@ namespace SWARCOParam_VS13 {
 			this->outputTextBox->TabIndex = 0;
 			this->outputTextBox->TabStop = false;
 			this->outputTextBox->Text = resources->GetString(L"outputTextBox.Text");
+			this->outputTextBox->CheckForIllegalCrossThreadCalls = false;
 			// 
 			// inputTextBox
 			// 
@@ -519,9 +519,10 @@ namespace SWARCOParam_VS13 {
 		//MEMBERS
 	SOCKET s;
 	private: int timeShort = 1, timeLong = 4;
-	private: bool folderSelected = false;
+	private: bool folderSelected = false,
+		firstConnection = true,
+		busy = false;
 	private: int iResult = -1;
-	private: bool firstConnection = true;
 	private: String^ directoryPath,
 		^ machineID = "",
 		^ lastInput = "",
@@ -560,7 +561,6 @@ namespace SWARCOParam_VS13 {
 		int time = sec * 300;
 		setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char *)&time, sizeof(time));
 	}
-
 	private: void openTextFile(int i) {
 		std::string str = "notepad.exe \"";		// notepad.exe "
 		str.append(
@@ -590,6 +590,41 @@ namespace SWARCOParam_VS13 {
 	}
 	private: String^ getPath() {
 		return directoryPath;
+	}
+	private: void getMachineID() {
+		char* dataChar = strToChar("");
+		char* carriage = "\n";
+
+		if (machineID == "") {
+			xout("Naam van verbonden apparaat zoeken...\n");
+
+			StreamWriter^ outputFile = gcnew StreamWriter(getPath() + "\\machineIDTemp.txt");
+
+			send(s, dataChar, (int)strlen(dataChar), 0);
+			iResult = send(s, carriage, (int)strlen(carriage), 0);
+
+			timeout(1);
+			while (true) {
+				char recvbuf[DEFAULT_BUFLEN];
+
+				iResult = recv(s, recvbuf, DEFAULT_BUFLEN, 0);
+				String^ output = charToStr(recvbuf);
+				memset(recvbuf, 0, sizeof(recvbuf));	//Reset recvbuf
+
+				if (iResult > 0) {
+					if (output->Contains(">")) {
+						String^ id = output->Substring(output->IndexOf(' ') + 1, //found machine ID, substrng to set machineID
+							output->IndexOf('>') - (output->IndexOf(' ') + 1));
+						machineID = id;
+						xout("Naam apparaat gevonden: " + machineID + "\n");
+					}
+				}
+				else
+					break;
+			}
+			outputFile->Close();
+			File::Delete(getPath() + "\\machineIDTemp.txt");
+		}
 	}
 
 	private: String^ getTime() {
@@ -623,37 +658,13 @@ namespace SWARCOParam_VS13 {
 
 		return date;
 	}
-	private: String^ getSaveAdd() {
-		String^ saveFileName = " " + getDate() + " " + getTime();
-		return saveFileName;
+	private: String^ fileFormat(String^ name) {
+		String^ fileName;
+		fileName = name + " " + machineID + " " + getDate() + " " + getTime() + ".txt";
+		return fileName;
 	}
 
 			 //FUNCTIONAL FUNCTIONS
-	private: void lockAll(bool _lock) {
-		bool lock = (_lock) ? false : true;
-		wissenButton->Enabled = lock;
-		opslaanCheckBox->Enabled = lock;
-		inputTextBox->Enabled = lock;
-		ipTextBox->Enabled = lock;
-		poortTextBox->Enabled = lock;
-		controleerButton->Enabled = lock;
-
-		selecteerFolderButton->Enabled = lock;
-		folderSelectedLabel->Enabled = lock;
-		pdump1Button->Enabled = lock;
-		pdump2Button->Enabled = lock;
-		pdump1LinkLabel->Enabled = lock;
-		pdump2LinkLabel->Enabled = lock;
-		selecteerDump1Button->Enabled = lock;
-		selecteerDump2Button->Enabled = lock;
-
-		verschillenButton->Enabled = lock;
-		resultaatVerschillenButton->Enabled = lock;
-		bijwerkenButton->Enabled = lock;
-		resultaatBijwerkenButton->Enabled = lock;
-
-		afsluitenButton->Enabled = lock;
-	}
 	private: bool selectFolder() {
 		FolderBrowserDialog^ folderBrowserDialog1 = gcnew FolderBrowserDialog;
 		System::Windows::Forms::DialogResult result;
@@ -736,39 +747,12 @@ namespace SWARCOParam_VS13 {
 		return true;
 	}
 	private: bool sendData(String^ data) {
+		if (machineID == "") {
+			getMachineID();
+		}
+
 		char* dataChar = strToChar(data);
 		char* carriage = "\n";
-
-		if (machineID == "") {
-			xout("Naam van verbonden apparaat zoeken...\n");
-			
-			StreamWriter^ outputFile = gcnew StreamWriter(getPath() + "\\tmp.txt");
-
-			send(s, "", (int)strlen(dataChar), 0);
-			iResult = send(s, carriage, (int)strlen(carriage), 0);
-			
-			timeout(1);
-			while (true) {
-				char recvbuf[DEFAULT_BUFLEN];
-
-				iResult = recv(s, recvbuf, DEFAULT_BUFLEN, 0);
-				String^ output = charToStr(recvbuf);
-				memset(recvbuf, 0, sizeof(recvbuf));	//Reset recvbuf
-
-				if (iResult > 0) {
-					if (output->Contains(">")) {
-						String^ id = output->Substring(output->IndexOf(' ') + 1, //found machine ID, substrng to set machineID
-							output->IndexOf('>') - (output->IndexOf(' ') + 1));
-						machineID = id;
-						xout("Naam gevonden: " + machineID + "\n");
-					}
-				}
-				else
-					break;
-			}
-			outputFile->Close();
-			File::Delete(getPath() + "\\tmp.txt");
-		}
 
 		send(s, dataChar, (int)strlen(dataChar), 0);
 		iResult = send(s, carriage, (int)strlen(carriage), 0);
@@ -816,11 +800,10 @@ namespace SWARCOParam_VS13 {
 	private: bool receiveDataSave(String^ fileName, int time) {
 		SetCurrentDirectoryA(strToChar(getPath()));
 		int recvbuflen = DEFAULT_BUFLEN;
-		String^ saveFileName = getPath() + "\\" +
-			(fileName != "") ? fileName : "unknown";
-		saveFileName += " " + machineID + getSaveAdd() + ".txt";
+		String^ fileNamePath = getPath() + "\\" +
+			(fileName != "") ? fileFormat(fileName) : "unknown.txt";
 
-		StreamWriter^ outputFile = gcnew StreamWriter(saveFileName);
+		StreamWriter^ outputFile = gcnew StreamWriter(fileNamePath);
 
 		timeout(time);
 		while (true) {
@@ -835,7 +818,7 @@ namespace SWARCOParam_VS13 {
 					xout("\nEr is nog niet ingelogt - log eerst in via command line\n"
 						+ "Opdracht afgebroken\n\n");
 					outputFile->Close();
-					File::Delete(saveFileName);
+					File::Delete(fileNamePath);
 					return false;
 				}
 				
@@ -876,8 +859,9 @@ namespace SWARCOParam_VS13 {
 			else {
 				xout("Geen data (meer) ontvangen\n");
 				outputFile->Close();
-				savedToFile = saveFileName;
-				xout("Opgeslagen in: " + saveFileName + "\n");
+				savedToFile = fileNamePath;
+				if (!savedToFile->Contains("TEMP"))
+					xout("Opgeslagen in: " + savedToFile + "\n");
 				return true;
 			}
 		}
@@ -885,12 +869,21 @@ namespace SWARCOParam_VS13 {
 		return true;
 	}
 	private: bool compareFiles(String^ saveFile) {
-		StreamWriter^ verschillen = gcnew StreamWriter(saveFile + ".txt");
+		if (machineID == "") {
+			getMachineID();
+		}
+		
+		String^ fileNamePath = getPath() + "\\" + fileFormat(saveFile);
+		StreamWriter^ verschillen = gcnew StreamWriter(fileNamePath);
 		StreamReader^ dump2 = gcnew StreamReader(fileDump2);
 		bool difference = false;
 		bool paramNotFound = true;
 
 		if (!dump2) { xout("Fout: pDump2 kon niet geopend worden\n"); return false; }
+
+		verschillen->WriteLine("PDUMP 1 > " + fileDump1);
+		verschillen->WriteLine("PDUMP 2 > " + fileDump2);
+		verschillen->WriteLine("");
 
 		while (!dump2->EndOfStream) {	//Go through pdump2 and seperate parameter and value
 			String^ parameter2, ^ value2, ^ line2 = dump2->ReadLine();
@@ -908,6 +901,7 @@ namespace SWARCOParam_VS13 {
 			if (!dump1) { xout("Fout: pDump1 kon niet geopend worden\n"); return false; }
 
 			while (!dump1->EndOfStream) {	//Go through pdump1 to find matches
+
 				String^ parameter, ^ line = dump1->ReadLine();
 				if (line == "" || line->Contains("*") || line->Contains(">") || !line->Contains(":")
 					|| line->Contains("-")) {
@@ -937,7 +931,7 @@ namespace SWARCOParam_VS13 {
 		if (!difference) { //Not a single difference in pdumps
 			verschillen->WriteLine("Er waren geen verschillen gevonden");
 		}
-		savedToFile = saveFile + ".txt";
+		savedToFile = fileNamePath;
 		dump2->Close();
 		verschillen->Close();
 		return true;
@@ -945,10 +939,11 @@ namespace SWARCOParam_VS13 {
 	private: bool sendChanges(String^ saveFile) {
 		makeConnection();
 
-		StreamWriter^ wijzigingen = gcnew StreamWriter(saveFile + ".txt");
+		String^ fileNamePath = getPath() + "\\" + fileFormat(saveFile);
+
+		StreamWriter^ wijzigingen = gcnew StreamWriter(fileNamePath);
 		StreamReader^ verschillen = gcnew StreamReader(fileLog1);
-		String^ fileName = saveFile,
-			^ tempFile = getPath() + "\\temp.txt";
+		String^ tempFile = getPath() + "\\TEMP";
 
 		while (!verschillen->EndOfStream) {	//Go through verschillen and check parameter and value of pdump1
 			String^ parameter,
@@ -957,8 +952,12 @@ namespace SWARCOParam_VS13 {
 
 			if (line->Contains("Er waren geen verschillen gevonden")) {
 				xout("Er waren geen verschillen gevonden - er kan niks gewijzigd worden\n");
+				closeConnection();
 				return false;
 			}
+
+			if (line->Contains(">") || line == "")
+				continue;
 
 			parameter = line->Substring(0, (line->IndexOf('\t') - 3));	//-3 to remove the 3 space-chars
 
@@ -969,43 +968,44 @@ namespace SWARCOParam_VS13 {
 			if (sendData(parameter + " = " + value)) {	//Try to connect and send data
 				receiveDataSave(tempFile, timeShort);	//if data send, check if it was send correctly and values changed
 
-				StreamReader^ temp = gcnew StreamReader(tempFile);
+				StreamReader^ temp = gcnew StreamReader(savedToFile);
 				bool corrected = false;
 				bool fileIsEmpty = true;
 
 				while (!temp->EndOfStream) {	//Check the latest output for system corrections
 					fileIsEmpty = false;
-					String ^ tmpValue,
-						^ tmpLine = temp->ReadLine();
+					String ^ tempValue,
+						^ tempLine = temp->ReadLine();
 
-					if (tmpLine->Contains("=")) {
-						if (tmpLine->Contains(" - ")) {	//Input was wrong, and say what was wrong
-							String^ message = tmpLine->Substring(tmpLine->LastIndexOf('-') + 2);
+					if (tempLine->Contains("=")) {
+						if (tempLine->Contains(" - ")) {	//Input was wrong, and say what was wrong
+							String^ message = tempLine->Substring(tempLine->LastIndexOf('-') + 2);
 							xout(parameter + " is NIET veranderd vanwege een melding: "
 								+ message + "\n");
-							wijzigingen->WriteLine(parameter + " is NIET veranderd vanwege een melding: "
-								+ message);
+							wijzigingen->WriteLine("!!!  " + parameter + " is NIET veranderd vanwege een melding: "
+								+ message + "  !!!");
 							corrected = true;
 							break;
 						}
 						continue;
 					}
 
-					if (tmpLine->Contains("System correction")) {	//There has been a correction
+					if (tempLine->Contains("System correction")) {	//There has been a correction
 						wijzigingen->WriteLine(parameter + " is veranderd van " + value2 + " naar "
-							+ tmpValue + " (minimale waarde)" + " i.p.v. " + value);
+							+ tempValue + " (minimale waarde)" + " i.p.v. " + value);
 						xout(parameter + " is veranderd van " + value2 + " naar "
-							+ tmpValue + " (minimale waarde)" + " i.p.v. " + value + "\n");
+							+ tempValue + " (minimale waarde)" + " i.p.v. " + value + "\n");
 
 						corrected = true;
 						break;
 					}
 
-					if (!tmpLine->Contains("*"))
-						tmpValue = getValueFromLine(tmpLine);	//Last found value from file
+					if (!tempLine->Contains("*"))
+						tempValue = getValueFromLine(tempLine);	//Last found value from file
 				}	//Done checking lastOutput
 				temp->Close();
-				//File::Delete(getPath() + "\\temp.txt");
+				if (savedToFile->Contains("TEMP"))
+					File::Delete(savedToFile);
 
 				if (fileIsEmpty) {
 					xout(parameter + " is NIET veranderd - geen bevestiging ontvangen\n");
@@ -1028,17 +1028,15 @@ namespace SWARCOParam_VS13 {
 		closeConnection();
 		wijzigingen->Close();
 		verschillen->Close();
-		savedToFile = saveFile + ".txt";
-		fileLog2 = savedToFile;
-		openTextFile(4);
+		savedToFile = fileNamePath;
 		return true;
 	}
 
-	 //GUI COMPONENTS
+	//GUI COMPONENTS
 			 //CONNECTION
 	private: System::Void poortTextBox_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
 		// Accept only digits and the Backspace character
-		if (!Char::IsDigit(e->KeyChar) && e->KeyChar != 0x08){
+		if (!Char::IsDigit(e->KeyChar) && e->KeyChar != 0x08) {
 			e->Handled = true;
 		}
 	}
@@ -1052,56 +1050,80 @@ namespace SWARCOParam_VS13 {
 			e->Handled = true;
 	}
 	private: System::Void controleerButton_Click(System::Object^  sender, System::EventArgs^  e) {
-		String^ p1 = ipTextBox->Text->Substring(0, ipTextBox->Text->IndexOf('.')),
-			^ rest = ipTextBox->Text->Substring(ipTextBox->Text->IndexOf('.') + 1),
-			^ p2 = rest->Substring(0, rest->IndexOf('.'));
-		rest = rest->Substring(rest->IndexOf('.') + 1);
-		String^ p3 = rest->Substring(0, rest->IndexOf('.'));
-		String^ p4 = rest->Substring(rest->IndexOf('.') + 1);
-
-		bool ip = (p1 == "" || p2 == "" || p3 == "" || p4 == "" 
-			|| p1->Length > 3 || p2->Length > 3 || p3->Length > 3 || p4->Length > 3 
-			|| p4->Contains(".")) ? false : true;
-		bool port = (poortTextBox->Text != "") ? true : false;
-
-		//Check if IP and Port are entered correctly
-		if (ip && port) {
-			xout("Verbinding controleren met " + ipTextBox->Text
-				+ " op poort " + poortTextBox->Text + "...\n");
-
-			bool verbinding = makeConnection();
-			if (verbinding)
-				xout("Verbinding goed\n\n");
-			closeConnection();
-		}
-		else {
-			xout("Vul een geldig IP adres en poort in\n\n");
-		}
+		System::Threading::Thread ^t = gcnew System::Threading::Thread(
+			gcnew System::Threading::ThreadStart(this, &GUI::controleer ));
+		t->Start();
+		System::Threading::Thread::Sleep(10);
+		busy = true;
+		UseWaitCursor = true;
 	}
+		private: void controleer() {
+			if (busy) return; //Check if program is busy / socket is blocking
+
+			String^ p1 = ipTextBox->Text->Substring(0, ipTextBox->Text->IndexOf('.')),
+				^ rest = ipTextBox->Text->Substring(ipTextBox->Text->IndexOf('.') + 1),
+				^ p2 = rest->Substring(0, rest->IndexOf('.'));
+			rest = rest->Substring(rest->IndexOf('.') + 1);
+			String^ p3 = rest->Substring(0, rest->IndexOf('.'));
+			String^ p4 = rest->Substring(rest->IndexOf('.') + 1);
+
+			bool ip = (p1 == "" || p2 == "" || p3 == "" || p4 == ""
+				|| p1->Length > 3 || p2->Length > 3 || p3->Length > 3 || p4->Length > 3
+				|| p4->Contains(".")) ? false : true;
+			bool port = (poortTextBox->Text != "") ? true : false;
+
+			//Check if IP and Port are entered correctly
+			if (ip && port) {
+				xout("Verbinding controleren met " + ipTextBox->Text
+					+ " op poort " + poortTextBox->Text + "...\n");
+
+				bool verbinding = makeConnection();
+				if (verbinding)
+					xout("Verbinding goed\n\n");
+				closeConnection();
+			}
+			else {
+				xout("Vul een geldig IP adres en poort in\n\n");
+			}
+			busy = false;
+			UseWaitCursor = false;
+		}
 
 			 //TEXTBOX
 	private: System::Void wissenButton_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (busy) return;
 		outputTextBox->Text = "";
 	}
 	private: System::Void inputTextBox_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
+		if (busy) { return; }
+
 		if (e->KeyChar == (char)13) {
 			String^ text = inputTextBox->Text;
-
+			if (text == "") {
+				return;
+			}
 			if (text->Contains("\\") || text->Contains("/") || text->Contains("?") || text->Contains("*") ||
 				text->Contains(":") || text->Contains("\"") || text->Contains("<") || text->Contains(">") ||
 				text->Contains("|")) {
 				xout("Fout: Ongeldige input. Gebruik deze tekens niet: \\ / : * ? \" < > | \n");
+				busy = false;
+				UseWaitCursor = false;
 				return;
 			}
 
-			if (inputTextBox->Text == "") {
-				return;
+			if (text == "open") {
+
 			}
-			if (inputTextBox->Text == "close") {
-				closeConnection();
-				inputTextBox->Text = "";
-				return;
-			}
+			System::Threading::Thread ^t = gcnew System::Threading::Thread(
+				gcnew System::Threading::ThreadStart(this, &GUI::inputSend));
+			t->Start();
+			System::Threading::Thread::Sleep(10);
+			busy = true;
+			UseWaitCursor = true;
+		}
+	}
+		private: void inputSend() {
+			String^ text = inputTextBox->Text;
 
 			inputTextBox->Enabled = false;
 			lastInput = inputTextBox->Text;
@@ -1122,9 +1144,14 @@ namespace SWARCOParam_VS13 {
 			}
 			inputTextBox->Enabled = true;
 			closeConnection();
+			busy = false;
+			UseWaitCursor = false;
 		}
-	}
 	private: System::Void opslaanCheckBox_CheckStateChanged(System::Object^  sender, System::EventArgs^  e) {
+		if (busy) {
+			opslaanCheckBox->Checked = false;
+			return;
+		}
 		if (opslaanCheckBox->Checked == true) {
 			if (!folderSelectedLabel->Enabled) {
 				if (!selectFolder()) {
@@ -1139,6 +1166,7 @@ namespace SWARCOParam_VS13 {
 		}
 	}
 	private: System::Void selecteerFolderButton_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (busy) { return; }
 		selectFolder();
 	}
 	private: System::Void folderSelectedLabel_LinkClicked(System::Object^  sender, System::Windows::Forms::LinkLabelLinkClickedEventArgs^  e) {
@@ -1149,6 +1177,7 @@ namespace SWARCOParam_VS13 {
 		SetCurrentDirectoryA(strToChar(getPath()));
 		WinExec(openExplorer, SW_SHOW);
 	}
+
 			 //PDUMP
 	private: System::Void pdump1LinkLabel_LinkClicked(System::Object^  sender, System::Windows::Forms::LinkLabelLinkClickedEventArgs^  e) {
 		pdump1LinkLabel->Enabled = false;	//Disable the option of double-clicking
@@ -1161,10 +1190,16 @@ namespace SWARCOParam_VS13 {
 		pdump2LinkLabel->Enabled = true;
 	}
 	private: System::Void pdump1Button_Click(System::Object^  sender, System::EventArgs^  e) {
-		pdump1Button->Enabled = false;
-		inputTextBox->Enabled = false;
-		inputTextBox->Refresh();
-
+		if (busy) return; //Check if program is busy / socket is blocking
+		
+		System::Threading::Thread ^t = gcnew System::Threading::Thread(
+			gcnew System::Threading::ThreadStart(this, &GUI::dump1));
+		t->Start();
+		System::Threading::Thread::Sleep(10);
+		busy = true;
+		UseWaitCursor = true;
+	}
+		private: void dump1() {
 		xout("Bezig met pDump1 maken...\n");
 		if (makeConnection()) {
 			if (sendData("pdump")) {
@@ -1179,37 +1214,46 @@ namespace SWARCOParam_VS13 {
 			}
 		}
 		closeConnection();
-		pdump1Button->Enabled = true;
-		inputTextBox->Enabled = true;
-
+		busy = false;
+		UseWaitCursor = false;
 	}
 	private: System::Void pdump2Button_Click(System::Object^  sender, System::EventArgs^  e) {
-		pdump2Button->Enabled = false;
-		inputTextBox->Enabled = false;
-		inputTextBox->Refresh();
-		resultaatVerschillenButton->Enabled = false;
-		bijwerkenButton->Enabled = false;
-		resultaatBijwerkenButton->Enabled = false;
+		if (busy) return; //Check if program is busy / socket is blocking
+		
+		System::Threading::Thread ^t = gcnew System::Threading::Thread(
+			gcnew System::Threading::ThreadStart(this, &GUI::dump2));
+		t->Start();
+		System::Threading::Thread::Sleep(10);
+		UseWaitCursor = true;
+		busy = true;
+	}
+		private: void dump2() {
+			pdump2Button->Enabled = false;
+			resultaatVerschillenButton->Enabled = false;
+			bijwerkenButton->Enabled = false;
+			resultaatBijwerkenButton->Enabled = false;
 
-		xout("Bezig met pDump2 maken...\n");
-		if (makeConnection()) {
-			if (sendData("pdump")) {
-				String^ pdump2 = "PDUMP 2";
-				if (receiveDataSave(pdump2, timeLong)) { //pDump made succesfully
-					verschillenButton->Enabled = true;
-					fileDump2 = directoryPath + "\\" + savedToFile;
-					pdump2LinkLabel->Text = "..\\" + getDirectory() + "\\" + savedToFile;
-					pdump2LinkLabel->Enabled = true;
-					xout("Gereed\n\n");
+			xout("Bezig met pDump2 maken...\n");
+			if (makeConnection()) {
+				if (sendData("pdump")) {
+					String^ pdump2 = "PDUMP 2";
+					if (receiveDataSave(pdump2, timeLong)) { //pDump made succesfully
+						verschillenButton->Enabled = true;
+						fileDump2 = directoryPath + "\\" + savedToFile;
+						pdump2LinkLabel->Text = "..\\" + getDirectory() + "\\" + savedToFile;
+						pdump2LinkLabel->Enabled = true;
+						xout("Gereed\n\n");
+					}
 				}
 			}
+			closeConnection();
+			pdump2Button->Enabled = true;
+			busy = false;
+			UseWaitCursor = false;
 		}
-		closeConnection();
-		pdump2Button->Enabled = true;
-		inputTextBox->Enabled = true;
-
-	}
 	private: System::Void selecteerDump1Button_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (busy) return; //Check if program is busy / socket is blocking
+		
 		selecteerDump1Button->Enabled = false;
 		OpenFileDialog ^ openFileDialog1 = gcnew OpenFileDialog();
 		openFileDialog1->Filter = "Text Files|*.txt";
@@ -1229,10 +1273,28 @@ namespace SWARCOParam_VS13 {
 			fileDump1 = openFileDialog1->FileName;
 			pdump1LinkLabel->Text = "..\\" + parent + "\\" + fileName;
 			pdump1LinkLabel->Enabled = true;
+
+			//get machine id from file because skipped connection
+			StreamReader^ outputFile = gcnew StreamReader(fileDump1);
+			while (!outputFile->EndOfStream) {
+				if (machineID != "") {
+					break;
+				}
+				String^ line = outputFile->ReadLine();
+				if (line->Contains(">")) {
+					String^ id = line->Substring(line->IndexOf(' ') + 1, //found machine ID, substrng to set machineID
+						line->IndexOf('>') - (line->IndexOf(' ') + 1));
+					machineID = id;
+					xout("Naam apparaat gevonden: " + machineID + "\n");
+				}
+			}
+
 		}
 		selecteerDump1Button->Enabled = true;
 	}
 	private: System::Void selecteerDump2Button_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (busy) return; //Check if program is busy / socket is blocking
+		
 		selecteerDump2Button->Enabled = false;
 		resultaatVerschillenButton->Enabled = false;
 		bijwerkenButton->Enabled = false;
@@ -1258,21 +1320,23 @@ namespace SWARCOParam_VS13 {
 
 			 //VERGELIJK/WIJZIG
 	private: System::Void verschillenButton_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (busy) return; //Check if program is busy / socket is blocking
+		
 		if (pdump1LinkLabel->Enabled == false || pdump2LinkLabel->Enabled == false) {
-			xout("Fout: Nog niet beide pDump bestanden geladen\n");
+			xout("Fout: Nog niet beide pDump bestanden geselecteerd\n");
 			return;
 		}
-		if (!pdump1LinkLabel->Text->Contains("pdump") || !pdump1LinkLabel->Text->Contains(".txt")) {
-			xout("Fout: pdump1 niet juist geselecteerd\n");
+		if ((!pdump1LinkLabel->Text->Contains("DUMP") && !pdump1LinkLabel->Text->Contains("dump")) || !pdump1LinkLabel->Text->Contains(".txt")) {
+			xout("Fout: Bestand 1 is geen .txt file of bevat geen 'dump' in de naam\n");
 			return;
 		}
-		if (!pdump2LinkLabel->Text->Contains("pdump") || !pdump2LinkLabel->Text->Contains(".txt")) {
-			xout("Fout: pdump2 niet juist geselecteerd\n");
+		if ((!pdump2LinkLabel->Text->Contains("DUMP") && !pdump2LinkLabel->Text->Contains("dump")) || !pdump2LinkLabel->Text->Contains(".txt")) {
+			xout("Fout: Bestand 2 is geen .txt file of bevat geen 'dump' in de naam\n");
 			return;
 		}
 		else {
 			xout("Bezig met vergelijken van pDump bestanden...\n");
-			String^ saveToFile = getPath() + "\\verschillen" + getSaveAdd();
+			String^ saveToFile = "verschillen";
 			if (compareFiles(saveToFile)) {	//Vergelijken is voltooid
 				xout("Gereed\n\n");
 				resultaatVerschillenButton->Enabled = true;
@@ -1286,25 +1350,41 @@ namespace SWARCOParam_VS13 {
 		}
 	}
 	private: System::Void bijwerkenButton_Click(System::Object^  sender, System::EventArgs^  e) {
-		bijwerkenButton->Enabled = false;
-		xout("Bezig met verschillen in te voeren...\n");
-		String^ saveToFile = getPath() + "\\wijzigingen" + getSaveAdd();
+		if (busy) return; //Check if program is busy / socket is blocking
 
-		if (sendChanges(saveToFile)) {
-			xout("Gereed\n\n");
-			fileLog2 = saveToFile;
-			resultaatBijwerkenButton->Enabled = true;
-		}
-		else
-			xout("Wijzigen niet gelukt\n\n");
-		bijwerkenButton->Enabled = true;
+		System::Threading::Thread ^t = gcnew System::Threading::Thread(
+			gcnew System::Threading::ThreadStart(this, &GUI::changesSend));
+		t->Start();
+		System::Threading::Thread::Sleep(10);
+		busy = true;
+		UseWaitCursor = true;
 	}
+		private: void changesSend() {
+			xout("Bezig met verschillen in te voeren...\n");
+			String^ saveToFile = "wijzigingen";
+			if (sendChanges(saveToFile)) {
+				xout("Gereed\n\n");
+				fileLog2 = savedToFile;
+				openTextFile(4);
+				resultaatBijwerkenButton->Enabled = true;
+				busy = false;
+				UseWaitCursor = false;
+			}
+			else
+				xout("Wijzigen niet gelukt\n\n");
+			UseWaitCursor = false; 
+			busy = false;
+		}
 	private: System::Void resultaatVerschillenButton_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (busy) return; //Check if program is busy / socket is blocking
+		
 		resultaatVerschillenButton->Enabled = false;	//Disable the option of double-clicking
 		openTextFile(3);
 		resultaatVerschillenButton->Enabled = true;
 	}
 	private: System::Void resultaatBijwerkenButton_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (busy) return; //Check if program is busy / socket is blocking
+		
 		resultaatBijwerkenButton->Enabled = false;	//Disable the option of double-clicking
 		openTextFile(4);
 		resultaatBijwerkenButton->Enabled = true;
@@ -1312,6 +1392,8 @@ namespace SWARCOParam_VS13 {
 
 			 //AFSLUITEN
 	private: System::Void afsluitenButton_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (busy) return; //Check if program is busy / socket is blocking
+		
 		using System::Windows::Forms::MessageBox;
 		System::Windows::Forms::DialogResult result = MessageBox::Show(
 			this, "Weet u zeker dat u het programma wilt afsluiten?",
