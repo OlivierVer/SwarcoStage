@@ -83,6 +83,7 @@ namespace SWARCOParam_VS13 {
 	private: System::Windows::Forms::Button^  button3;
 	private: System::Windows::Forms::Button^  button4;
 	private: System::Windows::Forms::PrintPreviewDialog^  printPreviewDialog1;
+	private: System::Windows::Forms::Button^  button5;
 
 	private:
 		/// <summary>
@@ -129,6 +130,7 @@ namespace SWARCOParam_VS13 {
 			this->saveFileDialog1 = (gcnew System::Windows::Forms::SaveFileDialog());
 			this->folderSelectedLabel = (gcnew System::Windows::Forms::LinkLabel());
 			this->printPreviewDialog1 = (gcnew System::Windows::Forms::PrintPreviewDialog());
+			this->button5 = (gcnew System::Windows::Forms::Button());
 			this->SuspendLayout();
 			// 
 			// outputTextBox
@@ -266,7 +268,7 @@ namespace SWARCOParam_VS13 {
 			// afsluitenButton
 			// 
 			this->afsluitenButton->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 13));
-			this->afsluitenButton->Location = System::Drawing::Point(920, 601);
+			this->afsluitenButton->Location = System::Drawing::Point(922, 601);
 			this->afsluitenButton->Margin = System::Windows::Forms::Padding(5);
 			this->afsluitenButton->Name = L"afsluitenButton";
 			this->afsluitenButton->Size = System::Drawing::Size(102, 53);
@@ -470,6 +472,18 @@ namespace SWARCOParam_VS13 {
 			this->printPreviewDialog1->Name = L"printPreviewDialog1";
 			this->printPreviewDialog1->Visible = false;
 			// 
+			// button5
+			// 
+			this->button5->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12));
+			this->button5->Location = System::Drawing::Point(949, 566);
+			this->button5->Name = L"button5";
+			this->button5->Size = System::Drawing::Size(75, 27);
+			this->button5->TabIndex = 32;
+			this->button5->Text = L"Debug";
+			this->button5->UseVisualStyleBackColor = true;
+			this->button5->Click += gcnew System::EventHandler(this, &GUI::button5_Click);
+			this->button5->Visible = false;
+			// 
 			// GUI
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(10, 20);
@@ -478,6 +492,7 @@ namespace SWARCOParam_VS13 {
 			this->BackgroundImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"$this.BackgroundImage")));
 			this->BackgroundImageLayout = System::Windows::Forms::ImageLayout::None;
 			this->ClientSize = System::Drawing::Size(1036, 668);
+			this->Controls->Add(this->button5);
 			this->Controls->Add(this->folderSelectedLabel);
 			this->Controls->Add(this->opslaanCheckBox);
 			this->Controls->Add(this->button4);
@@ -510,7 +525,7 @@ namespace SWARCOParam_VS13 {
 			this->Margin = System::Windows::Forms::Padding(5);
 			this->Name = L"GUI";
 			this->StartPosition = System::Windows::Forms::FormStartPosition::CenterScreen;
-			this->Text = L"SWARCO Nederland B.V.";
+			this->Text = L"pDump tool - SWARCO Nederland B.V.";
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -518,13 +533,14 @@ namespace SWARCOParam_VS13 {
 #pragma endregion
 		//MEMBERS
 	SOCKET s;
-	private: int timeShort = 1, timeLong = 4;
+	private: int timeShort = 1, timeLong = 4;	//timeShort is for any receive timeout, but long is specific for pdumps because it takes ~2 secs before sending
 	private: bool folderSelected = false,
 		firstConnection = true,
+		connected = false,
 		busy = false;
 	private: int iResult = -1;
 	private: String^ directoryPath,
-		^ machineID = "",
+		^ VRI_ID = "",
 		^ lastInput = "",
 		^ savedToFile = "";
 	private: String^ fileDump1 = "",
@@ -591,40 +607,48 @@ namespace SWARCOParam_VS13 {
 	private: String^ getPath() {
 		return directoryPath;
 	}
-	private: void getMachineID() {
+	private: bool getVRI_ID() {
 		char* dataChar = strToChar("");
 		char* carriage = "\n";
 
-		if (machineID == "") {
-			xout("Naam van verbonden apparaat zoeken...\n");
+		if (VRI_ID == "") {
+			xout("Naam van VRI zoeken...\n");
 
-			StreamWriter^ outputFile = gcnew StreamWriter(getPath() + "\\machineIDTemp.txt");
+			if (makeConnection()) {
+				send(s, dataChar, (int)strlen(dataChar), 0);
+				iResult = send(s, carriage, (int)strlen(carriage), 0);
+				
+				timeout(1);
+				while (true) {
+					char recvbuf[DEFAULT_BUFLEN];
 
-			send(s, dataChar, (int)strlen(dataChar), 0);
-			iResult = send(s, carriage, (int)strlen(carriage), 0);
+					iResult = recv(s, recvbuf, DEFAULT_BUFLEN, 0);
+					String^ output = charToStr(recvbuf);
+					memset(recvbuf, 0, sizeof(recvbuf));	//Reset recvbuf
 
-			timeout(1);
-			while (true) {
-				char recvbuf[DEFAULT_BUFLEN];
-
-				iResult = recv(s, recvbuf, DEFAULT_BUFLEN, 0);
-				String^ output = charToStr(recvbuf);
-				memset(recvbuf, 0, sizeof(recvbuf));	//Reset recvbuf
-
-				if (iResult > 0) {
-					if (output->Contains(">")) {
-						String^ id = output->Substring(output->IndexOf(' ') + 1, //found machine ID, substrng to set machineID
-							output->IndexOf('>') - (output->IndexOf(' ') + 1));
-						machineID = id;
-						xout("Naam apparaat gevonden: " + machineID + "\n");
+					if (iResult > 0) {
+						if (output->Contains(">")) {
+							String^ id = output->Substring(output->IndexOf(' ') + 1, //found VRI_ID, substrng to set VRI_ID
+								output->IndexOf('>') - (output->IndexOf(' ') + 1));
+							VRI_ID = id;
+							xout("Naam VRI gevonden: " + VRI_ID + "\n"
+								+ "Klopt dit niet, type dan 'VRI_ID' of voer handmatig in door\n"
+								+ "commando 'VRI_ID = NAAM' met NAAM als de naam van de VRI\n\n");
+						}
 					}
+					else
+						break;
 				}
-				else
-					break;
 			}
-			outputFile->Close();
-			File::Delete(getPath() + "\\machineIDTemp.txt");
 		}
+		if (VRI_ID == "") {
+			xout("Naam VRI niet gevonden - Geen reactie van VRI\n"
+				+ "Controleer verbinding of voer naam van VRI handmatig in door\n"
+				+ "commando 'VRI_ID = NAAM' met NAAM als de naam van de VRI\n\n");
+			return false;
+		}
+		else
+			return true;
 	}
 
 	private: String^ getTime() {
@@ -660,7 +684,7 @@ namespace SWARCOParam_VS13 {
 	}
 	private: String^ fileFormat(String^ name) {
 		String^ fileName;
-		fileName = name + " " + machineID + " " + getDate() + " " + getTime() + ".txt";
+		fileName = name + " " + VRI_ID + " " + getDate() + " " + getTime() + ".txt";
 		return fileName;
 	}
 
@@ -699,6 +723,8 @@ namespace SWARCOParam_VS13 {
 			return false;
 	}
 	private: bool makeConnection() {
+		if (connected) return true;
+
 		SOCKADDR_IN target;
 		WSADATA wsaData;
 
@@ -727,30 +753,31 @@ namespace SWARCOParam_VS13 {
 		}
 
 		if (firstConnection) {
-			xout("Bezig met verbinding te maken (max 20 seconden)...\n");
+			xout("Bezig met verbinding te maken (max 20 seconden)... ");
 		}
 
 		if (connect(s, (SOCKADDR *)&target, sizeof(target)) == SOCKET_ERROR) {
-			xout("Error: Geen verbinding kunnen maken\n\n");
+			xout("Niet gelukt\n\n");
 			firstConnection = true;
 			return false; //socket error
 		}
 		else {
+			xout("Socket geopend\n");
 			firstConnection = false;
+			connected = true;
 			return true; //socket succes	
 		}
+		connected = false;
 	}
 	private: bool closeConnection() {
+		xout("Socket afgebroken\n\n");	//for debug purposes
+		connected = false;
 		closesocket(s);
 		WSACleanup();
 		scrollDown();
 		return true;
 	}
 	private: bool sendData(String^ data) {
-		if (machineID == "") {
-			getMachineID();
-		}
-
 		char* dataChar = strToChar(data);
 		char* carriage = "\n";
 
@@ -759,15 +786,15 @@ namespace SWARCOParam_VS13 {
 		xout(data + "\n");
 
 		if (iResult == SOCKET_ERROR) {
-			xout("Verzenden van '" + data + "' niet gelukt. Error: " + WSAGetLastError() + "\n\n");
+			xout("Verzenden van '" + data + "' niet gelukt. WSA Error: " + WSAGetLastError() + "\n");
 			closeConnection();
-			WSACleanup();
 			return false;
 		}
 		return true;	
 	}
 	private: bool receiveDataOutput(int time) {
 		int recvbuflen = DEFAULT_BUFLEN;
+		bool receivedData = false;
 
 		timeout(time);
 		while (true) {
@@ -784,22 +811,31 @@ namespace SWARCOParam_VS13 {
 					return false;
 				}
 				xout(output);
+				receivedData = true;
 			}
 			else if (iResult == 0) {
-				outputTextBox->Text += "Verbinding verbroken\n";
+				outputTextBox->Text += "Verbinding verbroken door VRI\n";
 				return false;
 			}
 			else {
-				outputTextBox->Text += "Geen data (meer) ontvangen\n";
+				if (!receivedData)
+					outputTextBox->Text += "Geen data (meer) ontvangen\n";
 				return true;
 			}
 		}
-		closeConnection();
+		//closeConnection();
 		return true;
 	}
 	private: bool receiveDataSave(String^ fileName, int time) {
+		if (VRI_ID == "") {
+			bool succes = getVRI_ID();
+			if (!succes) {
+				return false;
+			}
+		}
 		SetCurrentDirectoryA(strToChar(getPath()));
 		int recvbuflen = DEFAULT_BUFLEN;
+		bool receivedData = false;
 		String^ fileNamePath = getPath() + "\\" +
 			(fileName != "") ? fileFormat(fileName) : "unknown.txt";
 
@@ -823,7 +859,8 @@ namespace SWARCOParam_VS13 {
 				}
 				
 				xout(output);
-				
+				receivedData = true;
+
 				int i = -1;
 				bool lastCharWasSpace = false;
 
@@ -857,7 +894,8 @@ namespace SWARCOParam_VS13 {
 				return false;
 			}
 			else {
-				xout("Geen data (meer) ontvangen\n");
+				if (!receivedData)
+					xout("Geen data (meer) ontvangen\n");
 				outputFile->Close();
 				savedToFile = fileNamePath;
 				if (!savedToFile->Contains("TEMP"))
@@ -869,8 +907,8 @@ namespace SWARCOParam_VS13 {
 		return true;
 	}
 	private: bool compareFiles(String^ saveFile) {
-		if (machineID == "") {
-			getMachineID();
+		if (VRI_ID == "") {
+			getVRI_ID();
 		}
 		
 		String^ fileNamePath = getPath() + "\\" + fileFormat(saveFile);
@@ -891,9 +929,9 @@ namespace SWARCOParam_VS13 {
 				|| line2->Contains("-")) {
 				continue;
 			}
-			parameter2 = line2->Substring(0, line2->IndexOf(':'));
-			//			parameter2 =parameter2->Substring(1);
-
+			parameter2 = (line2->StartsWith(" "))
+				? line2->Substring(1, (line2->IndexOf(':')) - 1)
+				: line2->Substring(0, line2->IndexOf(':'));
 
 			value2 = getValueFromLine(line2);
 
@@ -902,29 +940,34 @@ namespace SWARCOParam_VS13 {
 
 			while (!dump1->EndOfStream) {	//Go through pdump1 to find matches
 
-				String^ parameter, ^ line = dump1->ReadLine();
-				if (line == "" || line->Contains("*") || line->Contains(">") || !line->Contains(":")
-					|| line->Contains("-")) {
+				String^ parameter1, ^ line1 = dump1->ReadLine();
+				if (line1 == "" || line1->Contains("*") || line1->Contains(">") || !line1->Contains(":")
+					|| line1->Contains("-")) {
 					continue;
 				}
-				parameter = line->Substring(0, line->IndexOf(':'));
+				parameter1 = (line1->StartsWith(" "))
+					? line1->Substring(1, (line1->IndexOf(':')) - 1)
+					: line1->Substring(0, line1->IndexOf(':'));
 
-				if (parameter == parameter2) {	//Match found, get values
+				if (parameter1 == parameter2) {	//Match found, get values
 					paramNotFound = false;
-					String^ value = getValueFromLine(line);
+					String^ value1 = getValueFromLine(line1);
 
-					if (value->Contains(" "))
-						value = value->Substring(0, (value->Length - 1)); //remove ' '-space if it exists
-					if (value != value2) {	//Check values, not same? Write!
+					if (value1->Contains(" "))
+						value1 = value1->Substring(0, (value1->Length - 1)); //remove ' '-space if it exists
+					if (value1 != value2) {	//Check values, not same? Write!
 						difference = true;
-						verschillen->WriteLine(parameter + "   \tpdump1: " + value + "\tpdump2: " + value2);
+						verschillen->WriteLine(parameter1 + "   \tpdump1: " + value1 + "\tpdump2: " + value2);
 					}	//Done checking values, they're same, next parameter
 					dump1->Close();
 					break;
 				}	//Not same parameter, check next line for parameter
 				paramNotFound = true;
 			}	//Done checking dump1
-			if (paramNotFound) verschillen->WriteLine(parameter2 + " in dump2, maar niet in dump1");
+			if (paramNotFound) {
+				difference = true;
+				verschillen->WriteLine(parameter2 + " in dump2, maar niet in dump1");
+			}
 			dump1->Close();
 		}	//Done reading pdump2
 
@@ -952,11 +995,12 @@ namespace SWARCOParam_VS13 {
 
 			if (line->Contains("Er waren geen verschillen gevonden")) {
 				xout("Er waren geen verschillen gevonden - er kan niks gewijzigd worden\n");
-				closeConnection();
 				return false;
 			}
 
-			if (line->Contains(">") || line == "")
+			if (line->Contains(">") || line == "")	//Check if line indicates file or if it's empty
+				continue;
+			if (line->Contains("in dump2, maar niet in dump1"))	//Check if param was in dump2, but not in 1 -> Doens't need change in VRI
 				continue;
 
 			parameter = line->Substring(0, (line->IndexOf('\t') - 3));	//-3 to remove the 3 space-chars
@@ -1025,7 +1069,7 @@ namespace SWARCOParam_VS13 {
 				return false;
 			}
 		}
-		closeConnection();
+		//closeConnection();
 		wijzigingen->Close();
 		verschillen->Close();
 		savedToFile = fileNamePath;
@@ -1050,6 +1094,7 @@ namespace SWARCOParam_VS13 {
 			e->Handled = true;
 	}
 	private: System::Void controleerButton_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (busy) return; //Check if program is busy / socket is blocking
 		System::Threading::Thread ^t = gcnew System::Threading::Thread(
 			gcnew System::Threading::ThreadStart(this, &GUI::controleer ));
 		t->Start();
@@ -1058,8 +1103,6 @@ namespace SWARCOParam_VS13 {
 		UseWaitCursor = true;
 	}
 		private: void controleer() {
-			if (busy) return; //Check if program is busy / socket is blocking
-
 			String^ p1 = ipTextBox->Text->Substring(0, ipTextBox->Text->IndexOf('.')),
 				^ rest = ipTextBox->Text->Substring(ipTextBox->Text->IndexOf('.') + 1),
 				^ p2 = rest->Substring(0, rest->IndexOf('.'));
@@ -1080,7 +1123,7 @@ namespace SWARCOParam_VS13 {
 				bool verbinding = makeConnection();
 				if (verbinding)
 					xout("Verbinding goed\n\n");
-				closeConnection();
+				//closeConnection();
 			}
 			else {
 				xout("Vul een geldig IP adres en poort in\n\n");
@@ -1099,21 +1142,33 @@ namespace SWARCOParam_VS13 {
 
 		if (e->KeyChar == (char)13) {
 			String^ text = inputTextBox->Text;
-			if (text == "") {
-				return;
-			}
+
 			if (text->Contains("\\") || text->Contains("/") || text->Contains("?") || text->Contains("*") ||
 				text->Contains(":") || text->Contains("\"") || text->Contains("<") || text->Contains(">") ||
 				text->Contains("|")) {
-				xout("Fout: Ongeldige input. Gebruik deze tekens niet: \\ / : * ? \" < > | \n");
-				busy = false;
-				UseWaitCursor = false;
+				xout("Fout: Ongeldige input. Gebruik deze tekens niet: \\ / : * ? \" < > | \n\n");
 				return;
 			}
-
-			if (text == "open") {
-
+			if (text->Contains("VRI_ID =") || text->Contains("VRI_ID=")) {
+				try {
+					VRI_ID = text->Substring(text->IndexOf('=') + 1);
+					if (VRI_ID[0] == ' ') {
+						VRI_ID = VRI_ID->Substring(1);
+					}
+					xout("Naam VRI: '" + VRI_ID + "'\n"
+						+ "Klopt dit niet, type dan 'VRI_ID' of voer handmatig in door\n"
+						+ "commando 'VRI_ID = NAAM' met NAAM als de naam van de VRI\n\n");
+					inputTextBox->Text = "";
+					return;
+				}
+				catch (IndexOutOfRangeException^ e) {
+					xout("Naam VRI onbekend\n"
+						+ "Probeer opnieuw met commando 'VRI_ID' of 'VRI_ID = NAAM'\n\n");
+					inputTextBox->Text = "";
+					return;
+				}
 			}
+
 			System::Threading::Thread ^t = gcnew System::Threading::Thread(
 				gcnew System::Threading::ThreadStart(this, &GUI::inputSend));
 			t->Start();
@@ -1125,25 +1180,33 @@ namespace SWARCOParam_VS13 {
 		private: void inputSend() {
 			String^ text = inputTextBox->Text;
 
-			inputTextBox->Enabled = false;
-			lastInput = inputTextBox->Text;
-			int time = (inputTextBox->Text == "pdump") ? timeLong : timeShort;
+			if (text == "VRI_ID") {
+				inputTextBox->Text = "";
+				VRI_ID = "";
+				getVRI_ID();
+				busy = false;
+				UseWaitCursor = false;
+				return;
+			}
+
+			lastInput = text;
 			inputTextBox->Text = "";
 			inputTextBox->Refresh();
 
-			makeConnection();
-			if (sendData(text)) {
-				if (opslaanCheckBox->Checked == true) {
-					String^ fileName = text;
-					if (receiveDataSave(fileName, time))
-						xout("Gereed\n\n");;
+			if (makeConnection()) {
+				if (sendData(text)) {
+					int time = (text == "pdump") ? timeLong : timeShort;
+					if (opslaanCheckBox->Checked == true) {
+						String^ fileName = text;
+						if (receiveDataSave(fileName, time))
+							xout("Gereed\n\n");
+					}
+					else
+						if (receiveDataOutput(time))
+							xout("Gereed\n\n");
 				}
-				else
-					if (receiveDataOutput(time))
-						xout("Gereed\n\n");
 			}
-			inputTextBox->Enabled = true;
-			closeConnection();
+			//closeConnection();
 			busy = false;
 			UseWaitCursor = false;
 		}
@@ -1178,7 +1241,7 @@ namespace SWARCOParam_VS13 {
 		WinExec(openExplorer, SW_SHOW);
 	}
 
-			 //PDUMP
+			 //PDUMPS
 	private: System::Void pdump1LinkLabel_LinkClicked(System::Object^  sender, System::Windows::Forms::LinkLabelLinkClickedEventArgs^  e) {
 		pdump1LinkLabel->Enabled = false;	//Disable the option of double-clicking
 		openTextFile(1);
@@ -1200,23 +1263,31 @@ namespace SWARCOParam_VS13 {
 		UseWaitCursor = true;
 	}
 		private: void dump1() {
-		xout("Bezig met pDump1 maken...\n");
-		if (makeConnection()) {
-			if (sendData("pdump")) {
-				String^ pdump1 = "PDUMP 1";
-				if (receiveDataSave(pdump1, timeLong)) { //pDump made succesfully
-					pdump2Button->Enabled = true;
-					fileDump1 = directoryPath + "\\" + savedToFile;
-					pdump1LinkLabel->Text = "..\\" + getDirectory() + "\\" + savedToFile;
-					pdump1LinkLabel->Enabled = true;
-					xout("Gereed\n\n");
+			if (VRI_ID == "") {
+				bool succes = getVRI_ID();
+				busy = false;
+				UseWaitCursor = false;
+				if (!succes) {
+					return;
 				}
 			}
+			xout("Bezig met pDump1 maken...\n");
+			if (makeConnection()) {
+				if (sendData("pdump")) {
+					String^ pdump1 = "PDUMP 1";
+					if (receiveDataSave(pdump1, timeLong)) { //pDump made succesfully
+						pdump2Button->Enabled = true;
+						fileDump1 = directoryPath + "\\" + savedToFile;
+						pdump1LinkLabel->Text = "..\\" + getDirectory() + "\\" + savedToFile;
+						pdump1LinkLabel->Enabled = true;
+						xout("Gereed\n\n");
+					}
+				}
+			}
+			//closeConnection();
+			busy = false;
+			UseWaitCursor = false;
 		}
-		closeConnection();
-		busy = false;
-		UseWaitCursor = false;
-	}
 	private: System::Void pdump2Button_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (busy) return; //Check if program is busy / socket is blocking
 		
@@ -1246,7 +1317,7 @@ namespace SWARCOParam_VS13 {
 					}
 				}
 			}
-			closeConnection();
+			//closeConnection();
 			pdump2Button->Enabled = true;
 			busy = false;
 			UseWaitCursor = false;
@@ -1274,18 +1345,18 @@ namespace SWARCOParam_VS13 {
 			pdump1LinkLabel->Text = "..\\" + parent + "\\" + fileName;
 			pdump1LinkLabel->Enabled = true;
 
-			//get machine id from file because skipped connection
+			//get VRI_ID from file because of skipped input
 			StreamReader^ outputFile = gcnew StreamReader(fileDump1);
 			while (!outputFile->EndOfStream) {
-				if (machineID != "") {
+				if (VRI_ID != "") {
 					break;
 				}
 				String^ line = outputFile->ReadLine();
 				if (line->Contains(">")) {
-					String^ id = line->Substring(line->IndexOf(' ') + 1, //found machine ID, substrng to set machineID
+					String^ id = line->Substring(line->IndexOf(' ') + 1, //found VRI_ID , substrng to set VRI_ID 
 						line->IndexOf('>') - (line->IndexOf(' ') + 1));
-					machineID = id;
-					xout("Naam apparaat gevonden: " + machineID + "\n");
+					VRI_ID = id;
+					xout("Naam VRI gevonden: " + VRI_ID + "\n");
 				}
 			}
 
@@ -1399,10 +1470,12 @@ namespace SWARCOParam_VS13 {
 			this, "Weet u zeker dat u het programma wilt afsluiten?",
 			"Afsluiten", MessageBoxButtons::YesNo);
 		if (result == System::Windows::Forms::DialogResult::Yes)
+			closeConnection();
 			this->Close();
 	}
 
 			 //TEST BUTTONS
+
 	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {	//Local
 		ipTextBox->Text = "127.0.0.1";
 		poortTextBox->Text = "5000";
@@ -1496,5 +1569,9 @@ namespace SWARCOParam_VS13 {
 		*/
 	}
 
+private: System::Void button5_Click(System::Object^  sender, System::EventArgs^  e) {
+	busy = false;
+	UseWaitCursor = false;
+}
 };
 }
