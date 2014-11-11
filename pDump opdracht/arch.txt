@@ -1,0 +1,14 @@
+startGui();
+
+makeConnection(ip adres, port);
+getpDump(File x); 		pdump van huidige kaart en sla op in file
+closeConnection();
+
+Txt file1; pDump oude regeling/kaart
+Txt file2; pDump nieuwe regeling/kaart
+
+checkpDump(File 1, File 2);	vergelijkt twee files
+	pushParam();
+	logParamChange();
+
+Txt file3; logFile (time, change1,change2,...)
