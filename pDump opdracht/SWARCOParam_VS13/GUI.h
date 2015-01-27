@@ -531,52 +531,75 @@ namespace SWARCOParam_VS13 {
 
 		}
 #pragma endregion
-		//MEMBERS
+//// MEMBER VARIABLES
 	SOCKET s;
-	private: int timeShort = 1, timeLong = 4;	//timeShort is for any receive timeout, but long is specific for pdumps because it takes ~2 secs before sending
+		//Variable for timeout if operation doesn't take long to send and receive
+	private: int timeShort = 1, 
+		//Variable for timeout if operation takes long to send and receive (pdumps take ~2 seconds before it actually starts sending)
+		timeLong = 4;
+		//Variable to check if folder has been selected so files will be saved here
 	private: bool folderSelected = false,
+		//Variable to check if connection was already established and give more feedback if not
 		firstConnection = true,
+		//Variable to check if socket is already connected
 		connected = false,
+		//Variable used to block user input during long processes (for example receiving pdump)
 		busy = false;
 	private: int iResult = -1;
 	private: String^ directoryPath,
 		^ VRI_ID = "",
-		^ lastInput = "",
 		^ savedToFile = "";
 	private: String^ fileDump1 = "",
 		^ fileDump2 = "",
 		^ fileLog1 = "",
 		^ fileLog2 = "";
+//// END OF MEMBER VARIABLES
 
-			 //PRACTICAL FUNCTIONS
+//// FUNCTIONS
+		//Returns a pointer to char (char*) after conversion from a handle to string (String^)
 	private: char* strToChar(String^ _str) {
 		IntPtr ptrToNativeString = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(_str);
 		char* strChar = static_cast<char*>(ptrToNativeString.ToPointer());
 		return strChar;
 	}
+		//Returns a handle to string (String^) after conversion from a pointer to char (char*)
 	private: String^ charToStr(char* _char) {
 		return gcnew String(_char);
 	}
+	
+		//Returns the value of a parameter (as String^) from the string (String^)
 	private: String^ getValueFromLine(String^ str) {
-		String^ value = (str->Contains("/"))	//if line2 contains '/', the line ends with a unit of measurement
-			? str->Substring(str->LastIndexOf(':') + 2, (str->LastIndexOf('/') - str->LastIndexOf(':') - 2))
-			: str->Substring(str->LastIndexOf(':') + 2);	//no unit, just read until EoL. +2 to skip output ": "
-		if (value->Contains(" ")) value = value->Substring(0, (value->Length - 1)); //remove ' '-space if it exists
+		String^ value = (str->Contains("/"))	//If string contains char '/', the line ends with a unit of measurement
+			? str->Substring(str->LastIndexOf(':') + 2, (str->LastIndexOf('/') - str->LastIndexOf(':') - 2))	//Remove unit of measurement from return value
+			: str->Substring(str->LastIndexOf(':') + 2);	//No unit found, just read value until EoL. Index + 2 to skip output ": "
+		if (value->Contains(" "))	//Check if the return value starts with a space
+			value = value->Substring(0, (value->Length - 1));	//if so remove ' '-space if it exists
 		return value;
 	}
+	
+		//Puts the view onto caret in the output textbox to ensure new written data is always visible
 	private: void scrollDown() {
 		outputTextBox->Refresh();
 		outputTextBox->SelectionStart = outputTextBox->Text->Length;
 		outputTextBox->ScrollToCaret();
 	}
+		//Add string to output textbox and move view to this new output
 	private: void xout(String^ str) {
 		outputTextBox->Text += str;
 		scrollDown();
 	}
+	
+		//Timeout in seconds before the socket stops blocking
 	private: void timeout(int sec) {
-		int time = sec * 300;
-		setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char *)&time, sizeof(time));
+		int time = sec * 300;	//Timeout is not completely accurate and after trial and error resulted in multiplying time times 300
+		setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char *)&time, sizeof(time));	//Sets socket timeout to value of time
 	}
+	
+		//Opens Notepad.exe in a new window with corresponding file. 
+			 //File 1: pDump file 1
+			 //File 2: pDump file 2
+			 //File 3: Result of comparing pDump files
+			 //File 4: Result of sending changes
 	private: void openTextFile(int i) {
 		std::string str = "notepad.exe \"";		// notepad.exe "
 		str.append(
@@ -589,24 +612,64 @@ namespace SWARCOParam_VS13 {
 		LPCSTR openNotepad = str.c_str();
 		WinExec(openNotepad, SW_SHOW);
 	}
+		//Opens a Windows FolderBrowserDialog to select a folder path and returns true on folder selected, false on not selected
+	private: bool selectFolder() {
+		FolderBrowserDialog^ folderBrowserDialog1 = gcnew FolderBrowserDialog;
+		System::Windows::Forms::DialogResult result;
+		result = folderBrowserDialog1->ShowDialog();
+		String^ path = "";
+
+		if (result == System::Windows::Forms::DialogResult::OK) {
+			if (folderBrowserDialog1->SelectedPath->Contains("New folder")			//Check if folder is selected properly.
+				|| folderBrowserDialog1->SelectedPath->Contains("Nieuwe map")) {	//Sometimes creating a new folder and selecting
+				using System::Windows::Forms::MessageBox;							//it too quickly in the Dialog Window results
+				System::Windows::Forms::DialogResult result = MessageBox::Show(		//in folder being set to "New Folder"
+					this, "Klopt het pad: \"" + folderBrowserDialog1->SelectedPath + "\"?",
+					"Geselecteerde pad", MessageBoxButtons::YesNo);
+				if (result != System::Windows::Forms::DialogResult::Yes) {	//Ask to reselect folder if it wasn't properly set
+					return selectFolder();
+				}
+			}
+
+			path = folderBrowserDialog1->SelectedPath;
+			if (path != "") {
+				directoryPath = path;
+				folderSelectedLabel->Text = path;
+				folderSelectedLabel->Enabled = true;
+				checkFolderLength();	//Check amount of chars in selected folder path to ensure it fits on screen
+				pdump1Button->Enabled = true;
+				return true;
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+	}
+		//Checks the amount of characters in the selected folder path. If between 35 and 70 characters, spread it over 2 lines
+		//If larger than 70 chars, spread over 3 lines
 	private: void checkFolderLength() {
 		if (folderSelectedLabel->Text->Length <= 35) return;
 		folderSelectedLabel->Text =
-			(folderSelectedLabel->Text->Length > 35 && folderSelectedLabel->Text->Length <= 70)
+			(folderSelectedLabel->Text->Length > 35 && folderSelectedLabel->Text->Length <= 70)	//Check if string is between 35 and 70 chars
 			? folderSelectedLabel->Text->Substring(0, 35) 
 				+ "\n" + folderSelectedLabel->Text->Substring(35, folderSelectedLabel->Text->Length - 35)
 			: folderSelectedLabel->Text->Substring(0, 35)
 				+ "\n" + folderSelectedLabel->Text->Substring(35, 35)
 				+ "\n" + folderSelectedLabel->Text->Substring(70, folderSelectedLabel->Text->Length - 70);
 	}
-	private: String^ getDirectory() {
-		String^ parent = getPath();
-		parent = parent->Substring(parent->LastIndexOf('\\'));
-		return parent->Substring(1);	//to remove '\' at start
-	}
+	
+		//Returns (String^) the path to currently selected directory/folder
 	private: String^ getPath() {
 		return directoryPath;
 	}
+		//Returns (String^) the name of current selected directory/folder
+	private: String^ getDirectory() {
+		String^ parent = getPath();
+		parent = parent->Substring(parent->LastIndexOf('\\'));
+		return parent->Substring(1);	//Remove '\' at start  (example path 'C:\Windows' -> '\Windows' -> 'Windows')
+	}
+		//Sets value of VRI_ID from reading returned message after sending empty string. Returns true on value found, false on not found
 	private: bool getVRI_ID() {
 		char* dataChar = strToChar("");
 		char* carriage = "\n";
@@ -614,21 +677,21 @@ namespace SWARCOParam_VS13 {
 		if (VRI_ID == "") {
 			xout("Naam van VRI zoeken...\n");
 
-			if (makeConnection()) {
-				send(s, dataChar, (int)strlen(dataChar), 0);
-				iResult = send(s, carriage, (int)strlen(carriage), 0);
+			if (makeConnection()) {	//Connect to socket
+				send(s, dataChar, (int)strlen(dataChar), 0);	//Send ""
+				iResult = send(s, carriage, (int)strlen(carriage), 0);	//Send carriage return
 				
-				timeout(1);
+				timeout(1);	//Set short timeout on reponse to break following (endless) loop
 				while (true) {
 					char recvbuf[DEFAULT_BUFLEN];
 
 					iResult = recv(s, recvbuf, DEFAULT_BUFLEN, 0);
 					String^ output = charToStr(recvbuf);
-					memset(recvbuf, 0, sizeof(recvbuf));	//Reset recvbuf
+					memset(recvbuf, 0, sizeof(recvbuf));	//Reset recvbuf, buffer of received data
 
-					if (iResult > 0) {
-						if (output->Contains(">")) {
-							String^ id = output->Substring(output->IndexOf(' ') + 1, //found VRI_ID, substrng to set VRI_ID
+					if (iResult > 0) {	//Example with format of default reponse: 'VRI0013> Output' -> VRI_ID should be 'VRI0013'
+						if (output->Contains(">")) {	
+							String^ id = output->Substring(output->IndexOf(' ') + 1, //found VRI_ID, substring to set VRI_ID
 								output->IndexOf('>') - (output->IndexOf(' ') + 1));
 							VRI_ID = id;
 							xout("Naam VRI gevonden: " + VRI_ID + "\n"
@@ -641,16 +704,16 @@ namespace SWARCOParam_VS13 {
 				}
 			}
 		}
-		if (VRI_ID == "") {
+		if (VRI_ID == "") {	//VRI_ID not set, return false
 			xout("Naam VRI niet gevonden - Geen reactie van VRI\n"
 				+ "Controleer verbinding of voer naam van VRI handmatig in door\n"
 				+ "commando 'VRI_ID = NAAM' met NAAM als de naam van de VRI\n\n");
 			return false;
 		}
-		else
+		else	//VRI_ID set, return true
 			return true;
 	}
-
+		//Get time from system and return it as String^ with format hhmmss (hours, minutes, seconds)
 	private: String^ getTime() {
 		SYSTEMTIME sstm, lctm;
 		GetSystemTime(&sstm);
@@ -671,9 +734,10 @@ namespace SWARCOParam_VS13 {
 			second += "0";
 		second += sstm.wSecond;
 
-		time += hour + minute + second;	//142001   14u 20m 01s
+		time += hour + minute + second;	//142001   14h:20m:01s
 		return time;
 	}
+		//Get date from system and return it as String^ with format yymmdd (year, month, day)
 	private: String^ getDate() {
 		SYSTEMTIME sstm;
 		GetSystemTime(&sstm);
@@ -682,46 +746,15 @@ namespace SWARCOParam_VS13 {
 
 		return date;
 	}
+		//Returns the correct name of the file by adding the VRI_ID, date, time and ".txt" to the desired file name
 	private: String^ fileFormat(String^ name) {
 		String^ fileName;
 		fileName = name + " " + VRI_ID + " " + getDate() + " " + getTime() + ".txt";
 		return fileName;
 	}
 
-			 //FUNCTIONAL FUNCTIONS
-	private: bool selectFolder() {
-		FolderBrowserDialog^ folderBrowserDialog1 = gcnew FolderBrowserDialog;
-		System::Windows::Forms::DialogResult result;
-		result = folderBrowserDialog1->ShowDialog();
-		String^ path = "";
-
-		if (result == System::Windows::Forms::DialogResult::OK) {
-			if (folderBrowserDialog1->SelectedPath->Contains("New folder") 
-					|| folderBrowserDialog1->SelectedPath->Contains("Nieuwe map")) {
-				using System::Windows::Forms::MessageBox;
-				System::Windows::Forms::DialogResult result = MessageBox::Show(
-					this, "Klopt het pad: \"" + folderBrowserDialog1->SelectedPath + "\"?",
-					"Geselecteerde pad", MessageBoxButtons::YesNo);
-				if (result != System::Windows::Forms::DialogResult::Yes) {
-					return selectFolder();
-				}
-			}
-
-			path = folderBrowserDialog1->SelectedPath;
-			if (path != "") {
-				directoryPath = path;
-				folderSelectedLabel->Text = path;
-				folderSelectedLabel->Enabled = true;
-				checkFolderLength();
-				pdump1Button->Enabled = true;
-				return true;
-			}
-			else 
-				return false;
-		}
-		else 
-			return false;
-	}
+//// NETWORK FUNCTIONS
+		//Creates a socket and tries to connect to it
 	private: bool makeConnection() {
 		if (connected) return true;
 
@@ -769,6 +802,7 @@ namespace SWARCOParam_VS13 {
 		}
 		connected = false;
 	}
+		//Closes the connection and socket
 	private: bool closeConnection() {
 		xout("Socket afgebroken\n\n");
 		connected = false;
@@ -777,6 +811,7 @@ namespace SWARCOParam_VS13 {
 		scrollDown();
 		return true;
 	}
+		//Send String^ through socket and returns true on success; false if not succesful
 	private: bool sendData(String^ data) {
 		char* dataChar = strToChar(data);
 		char* carriage = "\n";
@@ -791,6 +826,7 @@ namespace SWARCOParam_VS13 {
 		}
 		return true;	
 	}
+		//Receives data from socket and prints it to the output text box. Returns true on success; false if not succesful
 	private: bool receiveDataOutput(int time) {
 		int recvbuflen = DEFAULT_BUFLEN;
 		bool receivedData = false;
@@ -825,6 +861,8 @@ namespace SWARCOParam_VS13 {
 		//closeConnection();
 		return true;
 	}
+		//Receives data from socket and prints it to the output textbox and saves it as .txt file in selected folder.
+		//Returns true on success; false if not succesful
 	private: bool receiveDataSave(String^ fileName, int time) {
 		if (VRI_ID == "") {
 			bool succes = getVRI_ID();
@@ -905,79 +943,8 @@ namespace SWARCOParam_VS13 {
 		outputFile->Close();
 		return true;
 	}
-	private: bool compareFiles(String^ saveFile) {
-		if (VRI_ID == "") {
-			getVRI_ID();
-		}
-		
-		String^ fileNamePath = getPath() + "\\" + fileFormat(saveFile);
-		StreamWriter^ verschillen = gcnew StreamWriter(fileNamePath);
-		StreamReader^ dump2 = gcnew StreamReader(fileDump2);
-		bool difference = false;
-		bool paramNotFound = true;
-
-		if (!dump2) { xout("Fout: pDump2 kon niet geopend worden\n"); return false; }
-
-		verschillen->WriteLine("PDUMP 1 > " + fileDump1);
-		verschillen->WriteLine("PDUMP 2 > " + fileDump2);
-		verschillen->WriteLine("");
-
-		while (!dump2->EndOfStream) {	//Go through pdump2 and seperate parameter and value
-			String^ parameter2, ^ value2, ^ line2 = dump2->ReadLine();
-			if (line2 == "" || line2->Contains("*") || line2->Contains(">") || !line2->Contains(":")
-				|| line2->Contains("-")) {
-				continue;
-			}
-			parameter2 = (line2->StartsWith(" "))
-				? line2->Substring(1, (line2->IndexOf(':')) - 1)
-				: line2->Substring(0, line2->IndexOf(':'));
-
-			value2 = getValueFromLine(line2);
-
-			StreamReader^ dump1 = gcnew StreamReader(fileDump1);
-			if (!dump1) { xout("Fout: pDump1 kon niet geopend worden\n"); return false; }
-
-			while (!dump1->EndOfStream) {	//Go through pdump1 to find matches
-
-				String^ parameter1, ^ line1 = dump1->ReadLine();
-				if (line1 == "" || line1->Contains("*") || line1->Contains(">") || !line1->Contains(":")
-					|| line1->Contains("-")) {
-					continue;
-				}
-				parameter1 = (line1->StartsWith(" "))
-					? line1->Substring(1, (line1->IndexOf(':')) - 1)
-					: line1->Substring(0, line1->IndexOf(':'));
-
-				if (parameter1 == parameter2) {	//Match found, get values
-					paramNotFound = false;
-					String^ value1 = getValueFromLine(line1);
-
-					if (value1->Contains(" "))
-						value1 = value1->Substring(0, (value1->Length - 1)); //remove ' '-space if it exists
-					if (value1 != value2) {	//Check values, not same? Write!
-						difference = true;
-						verschillen->WriteLine(parameter1 + "   \tpdump1: " + value1 + "\tpdump2: " + value2);
-					}	//Done checking values, they're same, next parameter
-					dump1->Close();
-					break;
-				}	//Not same parameter, check next line for parameter
-				paramNotFound = true;
-			}	//Done checking dump1
-			if (paramNotFound) {
-				difference = true;
-				verschillen->WriteLine(parameter2 + " in dump2, maar niet in dump1");
-			}
-			dump1->Close();
-		}	//Done reading pdump2
-
-		if (!difference) { //Not a single difference in pdumps
-			verschillen->WriteLine("Er waren geen verschillen gevonden");
-		}
-		savedToFile = fileNamePath;
-		dump2->Close();
-		verschillen->Close();
-		return true;
-	}
+		//Sends commands through socket to change all differences after comparing the two pDump files and saves results as .txt file.
+		//Returns true on success; false if not succesful
 	private: bool sendChanges(String^ saveFile) {
 		makeConnection();
 
@@ -1074,17 +1041,92 @@ namespace SWARCOParam_VS13 {
 		savedToFile = fileNamePath;
 		return true;
 	}
+		//Compares the two selected pDump files and saves the result as .txt file.
+		//Returns true on success; false if not succesful
+	private: bool compareFiles(String^ saveFile) {
+		if (VRI_ID == "") {
+			getVRI_ID();
+		}
+		
+		String^ fileNamePath = getPath() + "\\" + fileFormat(saveFile);
+		StreamWriter^ verschillen = gcnew StreamWriter(fileNamePath);
+		StreamReader^ dump2 = gcnew StreamReader(fileDump2);
+		bool difference = false;
+		bool paramNotFound = true;
 
-	//GUI COMPONENTS
-			 //CONNECTION
+		if (!dump2) { xout("Fout: pDump2 kon niet geopend worden\n"); return false; }
+
+		verschillen->WriteLine("PDUMP 1 > " + fileDump1);
+		verschillen->WriteLine("PDUMP 2 > " + fileDump2);
+		verschillen->WriteLine("");
+
+		while (!dump2->EndOfStream) {	//Go through pdump2 and seperate parameter and value
+			String^ parameter2, ^ value2, ^ line2 = dump2->ReadLine();
+			if (line2 == "" || line2->Contains("*") || line2->Contains(">") || !line2->Contains(":")
+				|| line2->Contains("-")) {
+				continue;
+			}
+			parameter2 = (line2->StartsWith(" "))
+				? line2->Substring(1, (line2->IndexOf(':')) - 1)
+				: line2->Substring(0, line2->IndexOf(':'));
+
+			value2 = getValueFromLine(line2);
+
+			StreamReader^ dump1 = gcnew StreamReader(fileDump1);
+			if (!dump1) { xout("Fout: pDump1 kon niet geopend worden\n"); return false; }
+
+			while (!dump1->EndOfStream) {	//Go through pdump1 to find matches
+
+				String^ parameter1, ^ line1 = dump1->ReadLine();
+				if (line1 == "" || line1->Contains("*") || line1->Contains(">") || !line1->Contains(":")
+					|| line1->Contains("-")) {
+					continue;
+				}
+				parameter1 = (line1->StartsWith(" "))
+					? line1->Substring(1, (line1->IndexOf(':')) - 1)
+					: line1->Substring(0, line1->IndexOf(':'));
+
+				if (parameter1 == parameter2) {	//Match found, get values
+					paramNotFound = false;
+					String^ value1 = getValueFromLine(line1);
+
+					if (value1->Contains(" "))
+						value1 = value1->Substring(0, (value1->Length - 1)); //remove ' '-space if it exists
+					if (value1 != value2) {	//Check values, not same? Write!
+						difference = true;
+						verschillen->WriteLine(parameter1 + "   \tpdump1: " + value1 + "\tpdump2: " + value2);
+					}	//Done checking values, they're same, next parameter
+					dump1->Close();
+					break;
+				}	//Not same parameter, check next line for parameter
+				paramNotFound = true;
+			}	//Done checking dump1
+			if (paramNotFound) {
+				difference = true;
+				verschillen->WriteLine(parameter2 + " in dump2, maar niet in dump1");
+			}
+			dump1->Close();
+		}	//Done reading pdump2
+
+		if (!difference) { //Not a single difference in pdumps
+			verschillen->WriteLine("Er waren geen verschillen gevonden");
+		}
+		savedToFile = fileNamePath;
+		dump2->Close();
+		verschillen->Close();
+		return true;
+	}
+	
+//// GUI COMPONENT FUNCTIONS
+			 //// CONNECTION
+		//Checks to accept only digits and the Backspace character in this text box
 	private: System::Void poortTextBox_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
-		// Accept only digits and the Backspace character
 		if (!Char::IsDigit(e->KeyChar) && e->KeyChar != 0x08) {
 			e->Handled = true;
 		}
 	}
+		//Checks to accept only digits, "." and the Backspace character in this text box
 	private: System::Void ipTextBox_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
-		// Accept only digits, "." and the Backspace character
 		if (e->KeyChar == '.'){
 			if (!this->ipTextBox->Text->Contains(".") && this->ipTextBox->SelectedText->Contains("."))
 				e->Handled = true;
@@ -1092,6 +1134,7 @@ namespace SWARCOParam_VS13 {
 		else if (!Char::IsDigit(e->KeyChar) && e->KeyChar != 0x08)
 			e->Handled = true;
 	}
+		//Button click to check connection
 	private: System::Void controleerButton_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (busy) return; //Check if program is busy / socket is blocking
 		
@@ -1103,7 +1146,8 @@ namespace SWARCOParam_VS13 {
 		UseWaitCursor = true;
 		/*controleer();*/
 	}
-		private: void controleer() {
+		//Checks if IP and Port numbers are entered correctly and check if socket can create a connection
+	private: void controleer() {
 			String^ p1 = ipTextBox->Text->Substring(0, ipTextBox->Text->IndexOf('.')),
 				^ rest = ipTextBox->Text->Substring(ipTextBox->Text->IndexOf('.') + 1),
 				^ p2 = rest->Substring(0, rest->IndexOf('.'));
@@ -1133,11 +1177,13 @@ namespace SWARCOParam_VS13 {
 			UseWaitCursor = false;
 		}
 
-			 //TEXTBOX
+			 //// TEXTFIELD
+		//Empties the output text box when clicked
 	private: System::Void wissenButton_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (busy) return;
 		outputTextBox->Text = "";
 	}
+		//Checks if input is correct
 	private: System::Void inputTextBox_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
 		if (busy) { return; }
 
@@ -1146,7 +1192,8 @@ namespace SWARCOParam_VS13 {
 
 			if (text->Contains("\\") || text->Contains("/") || text->Contains("?") || text->Contains("*") ||
 				text->Contains(":") || text->Contains("\"") || text->Contains("<") || text->Contains(">") ||
-				text->Contains("|")) {
+				text->Contains("|")) {	//Check if input is valid as above characters are not accepted by Windows as file name
+										//in case the save checkbox is checked
 				xout("Fout: Ongeldige input. Gebruik deze tekens niet: \\ / : * ? \" < > | \n\n");
 				return;
 			}
@@ -1181,11 +1228,12 @@ namespace SWARCOParam_VS13 {
 			/*inputSend();*/
 		}
 	}
-		private: void inputSend() {
+		//Sends text in input text box through socket
+	private: void inputSend() {
 			String^ text = inputTextBox->Text;
 
-			if (text == "VRI_ID") {
-				inputTextBox->Text = "";
+			if (text == "VRI_ID") {	//If VRI_ID is entered, user wants to have VRI_ID set
+				inputTextBox->Text = "";	//This is done by sending an empty string and checking the response
 				VRI_ID = "";
 				getVRI_ID();
 				busy = false;
@@ -1193,13 +1241,12 @@ namespace SWARCOParam_VS13 {
 				return;
 			}
 
-			lastInput = text;
 			inputTextBox->Text = "";
 			inputTextBox->Refresh();
 
 			if (makeConnection()) {
 				if (sendData(text)) {
-					int time = (text == "pdump") ? timeLong : timeShort;
+					int time = (text == "pdump") ? timeLong : timeShort;	//Set a long timeout in case a pdump is expected, else short
 					if (opslaanCheckBox->Checked == true) {
 						String^ fileName = text;
 						if (receiveDataSave(fileName, time))
@@ -1214,6 +1261,7 @@ namespace SWARCOParam_VS13 {
 			busy = false;
 			UseWaitCursor = false;
 		}
+		//If the checkbox is (un)ticked, give feedback to user through output textbox
 	private: System::Void opslaanCheckBox_CheckStateChanged(System::Object^  sender, System::EventArgs^  e) {
 		if (busy) {
 			opslaanCheckBox->Checked = false;
@@ -1232,10 +1280,13 @@ namespace SWARCOParam_VS13 {
 			xout("Alle volgende output wordt NIET opgeslagen\n");
 		}
 	}
+	
+			 ///// FOLDER SELECTION
 	private: System::Void selecteerFolderButton_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (busy) { return; }
 		selectFolder();
 	}
+		//Opens Windows Explorer and navigates to the selected folder
 	private: System::Void folderSelectedLabel_LinkClicked(System::Object^  sender, System::Windows::Forms::LinkLabelLinkClickedEventArgs^  e) {
 		std::string str = "explorer.exe \"";		// notepad.exe "
 		str.append(strToChar(directoryPath));
@@ -1245,17 +1296,20 @@ namespace SWARCOParam_VS13 {
 		WinExec(openExplorer, SW_SHOW);
 	}
 
-			 //PDUMPS
+			 //// PDUMPS
+		//Opens selected pDump in Notepad
 	private: System::Void pdump1LinkLabel_LinkClicked(System::Object^  sender, System::Windows::Forms::LinkLabelLinkClickedEventArgs^  e) {
 		pdump1LinkLabel->Enabled = false;	//Disable the option of double-clicking
 		openTextFile(1);
 		pdump1LinkLabel->Enabled = true;
 	}
+		//Opens selected pDump in Notepad
 	private: System::Void pdump2LinkLabel_LinkClicked(System::Object^  sender, System::Windows::Forms::LinkLabelLinkClickedEventArgs^  e) {
 		pdump2LinkLabel->Enabled = false;	//Disable the option of double-clicking
 		openTextFile(2);
 		pdump2LinkLabel->Enabled = true;
 	}
+		//Checks if program is busy and it not starts a pdump request
 	private: System::Void pdump1Button_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (busy) return; //Check if program is busy / socket is blocking
 		
@@ -1267,6 +1321,7 @@ namespace SWARCOParam_VS13 {
 		UseWaitCursor = true;
 		/*dump1();*/
 	}
+			//Requests a pdump through the socket and saves it to PDUMP1
 		private: void dump1() {
 			if (VRI_ID == "") {
 				bool succes = getVRI_ID();
@@ -1293,6 +1348,7 @@ namespace SWARCOParam_VS13 {
 			busy = false;
 			UseWaitCursor = false;
 		}
+			//Checks if program is busy and it not starts a pdump request
 	private: System::Void pdump2Button_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (busy) return; //Check if program is busy / socket is blocking
 		
@@ -1304,6 +1360,7 @@ namespace SWARCOParam_VS13 {
 		busy = true;
 		/*dump2();*/
 	}
+			//Requests a pdump through the socket and saves it to PDUMP2
 		private: void dump2() {
 			pdump2Button->Enabled = false;
 			resultaatVerschillenButton->Enabled = false;
@@ -1328,6 +1385,7 @@ namespace SWARCOParam_VS13 {
 			busy = false;
 			UseWaitCursor = false;
 		}
+		//Opens an OpenFileDialog to select a pDump file as pDump 1
 	private: System::Void selecteerDump1Button_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (busy) return; //Check if program is busy / socket is blocking
 		
@@ -1369,6 +1427,7 @@ namespace SWARCOParam_VS13 {
 		}
 		selecteerDump1Button->Enabled = true;
 	}
+		//Opens an OpenFileDialog to select a pDump file as pDump 2
 	private: System::Void selecteerDump2Button_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (busy) return; //Check if program is busy / socket is blocking
 		
@@ -1395,7 +1454,7 @@ namespace SWARCOParam_VS13 {
 		selecteerDump2Button->Enabled = true;
 	}
 
-			 //VERGELIJK/WIJZIG
+			 //// COMPARE FILES / SEND CHANGES
 	private: System::Void verschillenButton_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (busy) return; //Check if program is busy / socket is blocking
 		
@@ -1468,7 +1527,7 @@ namespace SWARCOParam_VS13 {
 		resultaatBijwerkenButton->Enabled = true;
 	}
 
-			 //AFSLUITEN
+			 //// AFSLUITEN
 	private: System::Void afsluitenButton_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (busy) return; //Check if program is busy / socket is blocking
 		
@@ -1480,23 +1539,24 @@ namespace SWARCOParam_VS13 {
 			closeConnection();
 			this->Close();
 	}
+////// END OF GUI COMPONENT FUNCTIONS
 
-			 //TEST BUTTONS
 
-	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {	//Local
-		ipTextBox->Text = "127.0.0.1";
-		poortTextBox->Text = "5000";
-	}
-	private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {	//Remote
-		ipTextBox->Text = "192.168.100.75";
-		poortTextBox->Text = "7000";
-	}
-	private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e)	{	//Unlock
-		pdump1Button->Enabled = true;
-		pdump2Button->Enabled = true;
-		verschillenButton->Enabled = true;
-	}
-	private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {	//DUMP
+//// TEST BUTTONS / Easy access
+private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {	//Local
+	ipTextBox->Text = "127.0.0.1";
+	poortTextBox->Text = "5000";
+}
+private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {	//Remote
+	ipTextBox->Text = "192.168.100.75";
+	poortTextBox->Text = "7000";
+}
+private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e)	{	//Unlock
+	pdump1Button->Enabled = true;
+	pdump2Button->Enabled = true;
+	verschillenButton->Enabled = true;
+}
+private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {	//DUMP
 		/*
 		SaveFileDialog^ saveFileDialog1 = gcnew SaveFileDialog;
 		saveFileDialog1->Filter = "txt files (*.txt)|*.txt";
@@ -1574,11 +1634,12 @@ namespace SWARCOParam_VS13 {
 		//} //SAVE CURRENT OUTPUT TO FILE
 
 		*/
-	}
-
+}
 private: System::Void button5_Click(System::Object^  sender, System::EventArgs^  e) {
 	busy = false;
 	UseWaitCursor = false;
 }
+
+
 };
 }
